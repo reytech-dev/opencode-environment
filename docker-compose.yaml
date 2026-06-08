@@ -1,0 +1,152 @@
+services:
+  opencode:
+    build:
+      context: .
+      dockerfile: dev/runners/opencode/Dockerfile
+    command: sleep infinity
+    group_add:
+      - "984"
+    environment:
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-""}
+      DOCKER_HOST: unix:///var/run/docker.sock
+    volumes:
+      - ./dev/scripts:/scripts:delegated
+      - .:/workspace:delegated
+      - ./dev/runners/opencode/opencode.json:/home/node/.config/opencode/opencode.json
+      # required for opencode to be able to spin up sibling containers for code execution and other tasks
+      - /var/run/docker.sock:/var/run/docker.sock
+      # local volumes
+      - bashhistory:/commandhistory
+      - opencode_data:/home/node/.local/share/opencode
+
+  java-runner:
+    build:
+      context: ./dev/runners/java
+    working_dir: /workspace
+    volumes:
+      - ./workspace/backend:/workspace:delegated
+      # required for testcontainers to be able to spin up sibling containers
+      - /var/run/docker.sock:/var/run/docker.sock
+      # local volumes
+      - m2_cache:/home/dev/.m2
+      - gradle_cache:/home/dev/.gradle
+    environment:
+      DOCKER_HOST: unix:///var/run/docker.sock
+      TESTCONTAINERS_HOST_OVERRIDE: host.docker.internal
+      SPRING_PROFILES_ACTIVE: local
+
+  node-runner:
+    build:
+      context: ./dev/runners/node
+    working_dir: /workspace
+    volumes:
+      - ./workspace/frontend:/workspace:delegated
+      # local volumes
+      - pnpm_store:/home/node/.local/share/pnpm/store
+
+  opentofu-runner:
+    build:
+      context: ./dev/runners/opentofu
+    working_dir: /workspace
+    volumes:
+      - ./workspace/infrastructure:/workspace:delegated
+
+  playwright-runner:
+    image: mcr.microsoft.com/playwright:${PLAYWRIGHT_VERSION:-latest}
+    user: pwuser
+    working_dir: /workspace
+    volumes:
+      - ./workspace/frontend:/workspace:delegated
+    environment:
+      BASE_URL: http://node-runner:3000
+      CI: "true"
+    command: tail -f /dev/null
+
+  open-design:
+    image: ghcr.io/reytech-dev/opencode-stack/opencode-stack:${OPEN_DESIGN_VERSION:-latest}
+    environment:
+      OD_API_TOKEN: ${OPEN_DESIGN_API_TOKEN:?Please run 'openssl rand -hex 32' to generate one, and set it in your .env file.}
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-""}
+      OD_CHAT_RUN_INACTIVITY_TIMEOUT_MS: ${OPEN_DESIGN_CHAT_RUN_INACTIVITY_TIMEOUT_MS:-600000}
+    volumes:
+      # local volumes
+      - open_design_opencode_data:/home/ubuntu/.local/share/opencode
+      - open_design_data:/app/.od
+    ports:
+    - "${OPEN_DESIGN_PORT:-7456}:7456"
+    # Required because of OD_API_TOKEN validation. The validation checks if the request comes from loopback interface, and in docker compose, the request comes from the internal docker network, which causes the validation to fail. 
+    # By using host network mode, the request comes from the loopback interface, and the validation passes.
+    network_mode: host
+
+  postgres:
+    image: postgres:${POSTGRESQL_VERSION:-18}
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-"backend"}
+      POSTGRES_USER: ${POSTGRES_USER:-"backend"}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-"backend"}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      # local volumes
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  mailpit:
+    image: axllent/mailpit
+    restart: unless-stopped
+    volumes:
+      # local volumes
+      - mailpit_data:/data
+    environment:
+      MP_MAX_MESSAGES: 5000
+      MP_DATABASE: /data/mailpit.db
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1
+
+  minio:
+    image: minio/minio:${MINIO_VERSION:-latest}
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-"minioadmin"}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-"minioadmin"}
+    command: server /data --console-address ":${MINIO_CONSOLE_PORT:-9001}"
+    ports:
+      - "${MINIO_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+    volumes:
+      # local volumes
+      - miniodata:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${MINIO_PORT:-9000}/minio/health/live"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  prometheus:
+    image: prom/prometheus:${PROMETHEUS_VERSION:-latest}
+    ports:
+      - "${PROMETHEUS_PORT:-9090}:9090"
+    volumes:
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+
+volumes:
+  # postgresql
+  postgres_data:
+  # opencode
+  bashhistory:
+  opencode_data:
+  # open-design
+  open_design_data:
+  open_design_opencode_data:
+  # mailpit
+  mailpit_data:
+  # minio
+  miniodata:
+  # node-runner
+  pnpm_store:
+  # java-runner
+  m2_cache:
+  gradle_cache:
