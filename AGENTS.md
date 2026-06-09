@@ -27,6 +27,18 @@ Both scripts are executed from the **project root** (`/workspace` inside the ope
 
 All commands are run from the project root.
 
+Each wrapper command accepts an optional second argument — a subdirectory within the workspace mount (e.g., a specific project folder under `workspace/backend/`). When provided, the command executes with that subdirectory as the container's working directory. When omitted, the command runs at the root of the mount (backward-compatible).
+
+```bash
+# Target a specific sub-project
+./dev/scripts/wrapper.sh backend:test my-app
+./dev/scripts/wrapper.sh frontend:build web-client
+./dev/scripts/wrapper.sh infrastructure:plan staging
+
+# Falls back to the mount root (existing behavior)
+./dev/scripts/wrapper.sh backend:test
+```
+
 ### Wrapper Script (`./dev/scripts/wrapper.sh`)
 
 #### Backend (Java)
@@ -70,21 +82,26 @@ All commands are run from the project root.
 
 #### Arbitrary Commands
 
-Use `--` to separate the runner name from the command:
+Use `--` to separate the runner name from the command. An optional subdirectory can be placed before the `--`:
 
 ```bash
+# Target a specific sub-project
+./dev/scripts/exec.sh backend:exec my-app -- ./gradlew test --tests '*RouteServiceTest'
+./dev/scripts/exec.sh frontend:exec web-client -- pnpm add -D vitest
+
+# Fall back to the mount root (existing behavior)
 ./dev/scripts/exec.sh backend:exec -- ./gradlew dependencies
-./dev/scripts/exec.sh backend:exec -- ./gradlew test --tests '*RouteServiceTest'
 ./dev/scripts/exec.sh frontend:exec -- pnpm why react
-./dev/scripts/exec.sh frontend:exec -- pnpm add -D vitest
 ./dev/scripts/exec.sh playwright:exec -- npx playwright test --debug
 ```
 
 #### Shell Access
 
+An optional subdirectory can be passed to open a shell in a specific project:
+
 ```bash
-./dev/scripts/exec.sh backend:shell
-./dev/scripts/exec.sh frontend:shell
+./dev/scripts/exec.sh backend:shell my-app
+./dev/scripts/exec.sh frontend:shell web-client
 ./dev/scripts/exec.sh playwright:shell
 ```
 
