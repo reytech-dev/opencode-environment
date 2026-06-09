@@ -23,13 +23,17 @@ services:
     build:
       context: ./dev/runners/java
     working_dir: /workspace
+    group_add:
+      - "984"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
-      - ./workspace/backend:/workspace:delegated
+      - ${HOST_PROJECT_DIR}/workspace/backend:/workspace:delegated
       # required for testcontainers to be able to spin up sibling containers
       - /var/run/docker.sock:/var/run/docker.sock
       # local volumes
-      - m2_cache:/home/dev/.m2
-      - gradle_cache:/home/dev/.gradle
+      - m2_cache:/home/ubuntu/.m2
+      - gradle_cache:/home/ubuntu/.gradle
     environment:
       DOCKER_HOST: unix:///var/run/docker.sock
       TESTCONTAINERS_HOST_OVERRIDE: host.docker.internal
