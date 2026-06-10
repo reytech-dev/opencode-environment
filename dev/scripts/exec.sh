@@ -130,6 +130,8 @@ main() {
         echo "Usage: ./exec.sh backend:exec [subdir] -- <command>" >&2
         exit 2
       fi
+      [ -n "${SUBDIR}" ] && shift
+      shift
       compose_run "${BACKEND_SERVICE}" "${SUBDIR}" "$@"
       ;;
 
@@ -139,6 +141,8 @@ main() {
         echo "Usage: ./exec.sh frontend:exec [subdir] -- <command>" >&2
         exit 2
       fi
+      [ -n "${SUBDIR}" ] && shift
+      shift
       compose_run "${FRONTEND_SERVICE}" "${SUBDIR}" "$@"
       ;;
 
@@ -148,6 +152,8 @@ main() {
         echo "Usage: ./exec.sh playwright:exec [subdir] -- <command>" >&2
         exit 2
       fi
+      [ -n "${SUBDIR}" ] && shift
+      shift
       compose_run "${PLAYWRIGHT_SERVICE}" "${SUBDIR}" "$@"
       ;;
 
