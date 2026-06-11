@@ -16,10 +16,12 @@ These directories are mounted into their respective Docker runner containers at 
 
 ## Command Policy
 
-**Never run raw `docker compose` commands directly.** Always use the project scripts executed from the project root:
+**All tooling commands must run inside the appropriate Docker runner container.** Do NOT invoke `pnpm`, `npm`, `node`, `npx`, `gradlew`, `tofu`, or similar project tooling binaries directly on the host or opencode container. Always route through the project scripts executed from the project root:
 
 - **`./dev/scripts/wrapper.sh <command>`** — Preferred. Use for named, predefined operations (test, build, run, etc.).
 - **`./dev/scripts/exec.sh <command>`** — Fallback. Use when the wrapper doesn't cover the needed operation. Also provides shell access and compose diagnostics.
+
+**Never run raw `docker compose` commands directly.**
 
 Both scripts are executed from the **project root** (`/workspace` inside the opencode container, or the repository root on the host).
 
@@ -48,6 +50,8 @@ Each wrapper command accepts an optional second argument — a subdirectory with
 | `./dev/scripts/wrapper.sh backend:version` | Print Java version |
 | `./dev/scripts/wrapper.sh backend:test` | Run `./gradlew test` |
 | `./dev/scripts/wrapper.sh backend:run` | Run `./gradlew bootRun` with service ports exposed |
+| `./dev/scripts/wrapper.sh backend:start` | Start backend in background (ensures PostgreSQL is healthy first). PID → `/tmp/backend.pid`, logs → `/tmp/backend.log` |
+| `./dev/scripts/wrapper.sh backend:stop` | Stop the background backend process |
 
 #### Frontend (Node.js)
 
@@ -57,6 +61,8 @@ Each wrapper command accepts an optional second argument — a subdirectory with
 | `./dev/scripts/wrapper.sh frontend:install` | Run `pnpm install` |
 | `./dev/scripts/wrapper.sh frontend:test` | Run `pnpm test` |
 | `./dev/scripts/wrapper.sh frontend:build` | Run `pnpm build` |
+| `./dev/scripts/wrapper.sh frontend:start` | Start frontend dev server in background (`pnpm dev`). PID → `/tmp/frontend.pid`, logs → `/tmp/frontend.log` |
+| `./dev/scripts/wrapper.sh frontend:stop` | Stop the background frontend process |
 | `./dev/scripts/wrapper.sh frontend:e2e` | Run `npx playwright test` in the Playwright runner |
 
 #### Infrastructure (OpenTofu)
@@ -68,7 +74,7 @@ Each wrapper command accepts an optional second argument — a subdirectory with
 | `./dev/scripts/wrapper.sh infrastructure:validate` | Run `tofu validate` |
 | `./dev/scripts/wrapper.sh infrastructure:apply` | Run `tofu apply` |
 
-#### Stack Logs
+#### Stack Management
 
 | Command | Action |
 |---|---|
@@ -77,6 +83,28 @@ Each wrapper command accepts an optional second argument — a subdirectory with
 | `./dev/scripts/wrapper.sh stack:logs:filestore` | MinIO logs |
 | `./dev/scripts/wrapper.sh stack:logs:metrics` | Prometheus logs |
 | `./dev/scripts/wrapper.sh stack:logs:mailer` | Mailpit logs |
+| `./dev/scripts/wrapper.sh stack:reset` | Force-remove all runner containers (clean up orphans from failed commands) |
+
+## Workflows
+
+### E2E Testing
+
+Requires the backend and frontend running. Run these commands in order:
+
+```bash
+./dev/scripts/wrapper.sh backend:start my-app        # 1. Start backend in background
+./dev/scripts/wrapper.sh frontend:start web-client   # 2. Start frontend in background
+./dev/scripts/wrapper.sh frontend:e2e web-client     # 3. Run Playwright tests
+```
+
+Clean up after:
+
+```bash
+./dev/scripts/wrapper.sh frontend:stop
+./dev/scripts/wrapper.sh backend:stop
+```
+
+Backend and frontend logs are written to `/tmp/backend.log` and `/tmp/frontend.log` respectively.
 
 ### Escape-Hatch Script (`./dev/scripts/exec.sh`)
 

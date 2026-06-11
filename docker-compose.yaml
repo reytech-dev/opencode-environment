@@ -44,7 +44,7 @@ services:
       context: ./dev/runners/node
     working_dir: /workspace
     volumes:
-      - ./workspace/frontend:/workspace:delegated
+      - ${HOST_PROJECT_DIR}/workspace/frontend:/workspace:delegated
       # local volumes
       - pnpm_store:/home/node/.local/share/pnpm/store
 
@@ -53,16 +53,17 @@ services:
       context: ./dev/runners/opentofu
     working_dir: /workspace
     volumes:
-      - ./workspace/infrastructure:/workspace:delegated
+      - ${HOST_PROJECT_DIR}/workspace/infrastructure:/workspace:delegated
 
   playwright-runner:
     image: mcr.microsoft.com/playwright:${PLAYWRIGHT_VERSION:-latest}
     user: pwuser
     working_dir: /workspace
     volumes:
-      - ./workspace/frontend:/workspace:delegated
+      - ${HOST_PROJECT_DIR}/workspace/frontend:/workspace:delegated
+      - playwright_cache:/home/pwuser/.cache/ms-playwright
     environment:
-      BASE_URL: http://node-runner:3000
+      FRONTEND_URL: http://node-runner:5173
       CI: "true"
     command: tail -f /dev/null
 
@@ -154,3 +155,5 @@ volumes:
   # java-runner
   m2_cache:
   gradle_cache:
+  # playwright-runner
+  playwright_cache:

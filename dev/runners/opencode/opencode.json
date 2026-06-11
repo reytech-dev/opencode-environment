@@ -17,5 +17,18 @@
         "apiKey": "{env:DEEPSEEK_API_KEY}"
       }
     }
+  },
+  "permission": {
+    "bash": {
+      "docker compose*": "deny",
+      "docker-compose*": "deny",
+      "pnpm *": "deny",
+      "npm *": "deny",
+      "npx *": "deny",
+      "node *": "deny",
+      "./gradlew *": "deny",
+      "gradlew *": "deny",
+      "tofu *": "deny"
+    }
   }
 }
