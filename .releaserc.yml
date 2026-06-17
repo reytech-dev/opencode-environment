@@ -64,7 +64,11 @@ plugins:
           -x "node_modules/*" \
           -x "dist/*" \
           -x "__pycache__/*" \
-          -x "*.pyc"
+          -x "*.pyc" \
+          -x "commitlint.config.cjs" \
+          -x "package.json" \
+          -x "package-lock.json" \
+          -x ".releaserc.yml"
 
   - - "@semantic-release/git"
     - assets:
