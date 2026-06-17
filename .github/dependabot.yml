@@ -1,0 +1,28 @@
+# Blueprint versions in .opencode/blueprints.yaml are tracked by
+# .github/workflows/update-blueprints.yml (weekly schedule).
+version: 2
+
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "UTC"
+    versioning-strategy: "increase"
+    commit-message:
+      prefix: "chore"
+      prefix-development: "chore"
+      include: "scope"
+    groups:
+      semantic-release:
+        patterns:
+          - "semantic-release"
+          - "@semantic-release/*"
+      commitlint:
+        patterns:
+          - "@commitlint/*"
+    labels:
+      - "dependencies"
+    open-pull-requests-limit: 5
