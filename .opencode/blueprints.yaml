@@ -1,0 +1,404 @@
+schema_version: "1.0"
+
+catalog:
+  id: "reytech-opencode-blueprints"
+  name: "Reytech opencode Blueprint Catalog"
+  description: "Blueprint catalog for materializing multi-repository opencode workspaces."
+  owner: "reytech-dev"
+  default_ref_policy: "tag-or-sha-recommended"
+  note: >
+    This catalog uses main as a development default. For reproducible project bootstraps,
+    replace default_ref values with immutable release tags or commit SHAs.
+
+workspace:
+  root: "workspace"
+
+project_profiles:
+  fullstack-web-app:
+    description: "Default full-stack web application with UI, GraphQL backend, and infrastructure modules."
+    recommended: true
+    components:
+      - "frontend/ui-apollo"
+      - "backend/java-graphql"
+      - "infrastructure/bootstrap-storage"
+      - "infrastructure/digitalocean"
+      - "infrastructure/cloudflare"
+
+  local-mvp:
+    description: "Local development MVP with frontend and backend only."
+    components:
+      - "frontend/ui-apollo"
+      - "backend/java-graphql"
+
+  infrastructure-only:
+    description: "Infrastructure-only project bootstrap."
+    components:
+      - "infrastructure/bootstrap-storage"
+      - "infrastructure/digitalocean"
+      - "infrastructure/cloudflare"
+
+selection_rules:
+  frontend:
+    select_when:
+      - "Feature contains user-visible pages, forms, navigation, dashboard, routes, or browser interaction."
+      - "Feature consumes Open Design artifacts or requires responsive/accessibility implementation."
+      - "Feature requires Apollo Client or generated GraphQL client operations."
+
+  backend:
+    select_when:
+      - "Feature requires GraphQL API schema, resolvers, domain logic, persistence, authorization, or integration behavior."
+      - "Feature requires database migrations or backend validation rules."
+      - "Frontend needs data not already exposed by an existing API."
+
+  infrastructure:
+    select_when:
+      - "Feature requires cloud resources, DNS, deployment targets, remote state, buckets, secrets, network configuration, or managed services."
+      - "Project bootstrap requires cloud baseline resources."
+
+  e2e:
+    select_when:
+      - "Feature touches both frontend and backend."
+      - "Feature introduces or changes a critical user journey."
+
+blueprints:
+  frontend:
+    ui-apollo:
+      id: "frontend/ui-apollo"
+      name: "Apollo UI Blueprint"
+      description: "React frontend application using Apollo Client, Vite, TypeScript, Vitest, Playwright, and pnpm."
+      repository: "reytech-dev/ui-apollo-blueprint"
+      repository_url: "https://github.com/reytech-dev/ui-apollo-blueprint"
+      default_ref: "v1.2.0"
+      ref_type: "tag"
+      area: "frontend"
+
+      workspace:
+        path_template: "workspace/frontend/{project}-ui"
+        command_project_template: "{project}-ui"
+        repository_name_template: "{project}-ui"
+
+      materialization:
+        default_mode: "copy"
+        allowed_modes:
+          - "copy"
+          - "clone"
+          - "template"
+
+      parameters:
+        project:
+          description: "Short lowercase project slug."
+          required: true
+          type: "string"
+          pattern: "^[a-z][a-z0-9-]*$"
+
+        app_name:
+          description: "Human-readable frontend application name."
+          required: false
+          type: "string"
+          default_template: "{project}"
+
+        package_name:
+          description: "package.json name."
+          required: false
+          type: "string"
+          default_template: "{project}-ui"
+
+        graphql_endpoint:
+          description: "GraphQL endpoint used by the frontend during local development."
+          required: false
+          type: "string"
+          default: "http://localhost:8080/graphql"
+
+      dependencies:
+        optional:
+          - blueprint: "backend/java-graphql"
+            reason: "GraphQL schema and endpoint are usually provided by the backend."
+
+      task_markers:
+        - "frontend"
+        - "ui"
+        - "react"
+        - "apollo"
+        - "client"
+        - "route"
+        - "page"
+        - "component"
+        - "form"
+        - "accessibility"
+        - "responsive"
+        - "playwright"
+        - "vitest"
+        - "typescript"
+
+  backend:
+    java-graphql:
+      id: "backend/java-graphql"
+      name: "Java GraphQL Backend Blueprint"
+      description: "Spring Boot GraphQL backend with WebFlux, R2DBC, Flyway, PostgreSQL, Actuator, and Testcontainers."
+      repository: "reytech-dev/java-graphql-blueprint"
+      repository_url: "https://github.com/reytech-dev/java-graphql-blueprint"
+      default_ref: "v1.0.1"
+      ref_type: "tag"
+      area: "backend"
+
+      workspace:
+        path_template: "workspace/backend/{project}-api"
+        command_project_template: "{project}-api"
+        repository_name_template: "{project}-api"
+
+      materialization:
+        default_mode: "copy"
+        allowed_modes:
+          - "copy"
+          - "clone"
+          - "template"
+
+      parameters:
+        project:
+          description: "Short lowercase project slug."
+          required: true
+          type: "string"
+          pattern: "^[a-z][a-z0-9-]*$"
+
+        service_name:
+          description: "Backend service name."
+          required: false
+          type: "string"
+          default_template: "{project}-api"
+
+        java_package:
+          description: "Base Java package."
+          required: false
+          type: "string"
+          default_template: "de.reytech.{project_normalized}"
+
+        database_name:
+          description: "Local PostgreSQL database name."
+          required: false
+          type: "string"
+          default_template: "{project_normalized}"
+
+        graphql_path:
+          description: "GraphQL HTTP endpoint."
+          required: false
+          type: "string"
+          default: "/graphql"
+
+      dependencies:
+        optional:
+          - blueprint: "infrastructure/digitalocean"
+            reason: "Production deployment may require compute infrastructure."
+          - blueprint: "infrastructure/cloudflare"
+            reason: "Public API DNS may require Cloudflare records."
+
+      task_markers:
+        - "backend"
+        - "api"
+        - "graphql"
+        - "schema"
+        - "resolver"
+        - "java"
+        - "spring"
+        - "webflux"
+        - "r2dbc"
+        - "postgres"
+        - "flyway"
+        - "database"
+        - "migration"
+        - "domain"
+        - "service"
+        - "authorization"
+        - "testcontainers"
+
+  infrastructure:
+    bootstrap-storage:
+      id: "infrastructure/bootstrap-storage"
+      name: "OpenTofu Bootstrap Storage Blueprint"
+      description: "Bootstrap S3-compatible remote state storage for OpenTofu."
+      repository: "reytech-dev/infra-bootstrap-storage"
+      repository_url: "https://github.com/reytech-dev/infra-bootstrap-storage"
+      default_ref: "v1.0.0"
+      ref_type: "tag"
+      area: "infrastructure"
+
+      workspace:
+        path_template: "workspace/infrastructure/{project}-bootstrap-storage"
+        command_project_template: "{project}-bootstrap-storage"
+        repository_name_template: "{project}-infra-bootstrap-storage"
+
+      materialization:
+        default_mode: "copy"
+        allowed_modes:
+          - "copy"
+          - "clone"
+          - "template"
+
+      parameters:
+        project:
+          description: "Short lowercase project slug."
+          required: true
+          type: "string"
+          pattern: "^[a-z][a-z0-9-]*$"
+
+        state_bucket_name:
+          description: "Remote state bucket name."
+          required: false
+          type: "string"
+          default_template: "{project}-tofu-state"
+
+        region:
+          description: "Provider region for bootstrap storage."
+          required: false
+          type: "string"
+
+      task_markers:
+        - "bootstrap"
+        - "remote state"
+        - "state backend"
+        - "s3"
+        - "bucket"
+        - "opentofu"
+        - "terraform"
+        - "infrastructure"
+
+    digitalocean:
+      id: "infrastructure/digitalocean"
+      name: "DigitalOcean Infrastructure Blueprint"
+      description: "OpenTofu infrastructure for DigitalOcean compute/network resources."
+      repository: "reytech-dev/infra-digitalocean"
+      repository_url: "https://github.com/reytech-dev/infra-digitalocean"
+      default_ref: "v1.0.0"
+      ref_type: "tag"
+      area: "infrastructure"
+
+      workspace:
+        path_template: "workspace/infrastructure/{project}-digitalocean"
+        command_project_template: "{project}-digitalocean"
+        repository_name_template: "{project}-infra-digitalocean"
+
+      materialization:
+        default_mode: "copy"
+        allowed_modes:
+          - "copy"
+          - "clone"
+          - "template"
+
+      parameters:
+        project:
+          description: "Short lowercase project slug."
+          required: true
+          type: "string"
+          pattern: "^[a-z][a-z0-9-]*$"
+
+        digitalocean_region:
+          description: "DigitalOcean region."
+          required: false
+          type: "string"
+          default: "fra1"
+
+      dependencies:
+        recommended:
+          - blueprint: "infrastructure/bootstrap-storage"
+            reason: "Remote state backend should exist before long-lived cloud infrastructure is managed."
+
+      exports:
+        - "frontend_reserved_ip"
+        - "backend_reserved_ip"
+
+      task_markers:
+        - "digitalocean"
+        - "droplet"
+        - "reserved ip"
+        - "compute"
+        - "network"
+        - "infrastructure"
+        - "opentofu"
+        - "terraform"
+
+    cloudflare:
+      id: "infrastructure/cloudflare"
+      name: "Cloudflare Infrastructure Blueprint"
+      description: "OpenTofu infrastructure for Cloudflare DNS and edge configuration."
+      repository: "reytech-dev/infra-cloudflare"
+      repository_url: "https://github.com/reytech-dev/infra-cloudflare"
+      default_ref: "v1.0.0"
+      ref_type: "tag"
+      area: "infrastructure"
+
+      workspace:
+        path_template: "workspace/infrastructure/{project}-cloudflare"
+        command_project_template: "{project}-cloudflare"
+        repository_name_template: "{project}-infra-cloudflare"
+
+      materialization:
+        default_mode: "copy"
+        allowed_modes:
+          - "copy"
+          - "clone"
+          - "template"
+
+      parameters:
+        project:
+          description: "Short lowercase project slug."
+          required: true
+          type: "string"
+          pattern: "^[a-z][a-z0-9-]*$"
+
+        domain:
+          description: "Root domain managed in Cloudflare."
+          required: true
+          type: "string"
+
+        frontend_hostname:
+          description: "Frontend hostname."
+          required: false
+          type: "string"
+          default_template: "www.{domain}"
+
+        backend_hostname:
+          description: "Backend API hostname."
+          required: false
+          type: "string"
+          default_template: "api.{domain}"
+
+      dependencies:
+        recommended:
+          - blueprint: "infrastructure/digitalocean"
+            reason: "DNS records often target reserved IP outputs from DigitalOcean infrastructure."
+
+      imports:
+        - "frontend_reserved_ip"
+        - "backend_reserved_ip"
+
+      task_markers:
+        - "cloudflare"
+        - "dns"
+        - "zone"
+        - "record"
+        - "domain"
+        - "hostname"
+        - "edge"
+        - "infrastructure"
+        - "opentofu"
+        - "terraform"
+
+inter_blueprint_dependencies:
+  - from: "frontend/ui-apollo"
+    to: "backend/java-graphql"
+    type: "optional"
+    reason: "Frontend commonly consumes the backend GraphQL schema and endpoint."
+
+  - from: "infrastructure/cloudflare"
+    to: "infrastructure/digitalocean"
+    type: "recommended"
+    reason: "Cloudflare DNS records often need DigitalOcean reserved IP outputs."
+
+  - from: "infrastructure/digitalocean"
+    to: "infrastructure/bootstrap-storage"
+    type: "recommended"
+    reason: "Long-lived OpenTofu infrastructure should use bootstrapped remote state."
+
+  - from: "infrastructure/cloudflare"
+    to: "infrastructure/bootstrap-storage"
+    type: "recommended"
+    reason: "Long-lived OpenTofu infrastructure should use bootstrapped remote state."
