@@ -1,3 +1,9 @@
+## [1.4.0](https://github.com/reytech-dev/opencode-environment/compare/v1.3.0...v1.4.0) (2026-06-18)
+
+### Features
+
+* **setup:** add cleanup script to remove not needed artifacts in workspace ([90d55d4](https://github.com/reytech-dev/opencode-environment/commit/90d55d49304a09b14fdffe034bee583be8e20fac))
+
 ## [1.3.0](https://github.com/reytech-dev/opencode-environment/compare/v1.2.1...v1.3.0) (2026-06-18)
 
 ### Features
