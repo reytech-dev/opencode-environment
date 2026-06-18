@@ -42,10 +42,11 @@ It should:
 
 * create `.env` from `.env.template`
 * generate local tokens where possible
-* ask for optional API credentials
 * create required workspace folders
 * configure the absolute project path
 * prepare the environment for Docker Compose
+
+Setup does not create application repositories or start Docker services. Backend, frontend, and infrastructure repositories come later.
 
 ### 3. Check your machine
 
@@ -63,7 +64,8 @@ It should check:
 * `.env` exists
 * workspace folders exist
 * runner scripts are executable
-* required containers can be built or started
+
+Doctor does not start Docker containers and does not require application repositories.
 
 ### 4. Start the environment
 

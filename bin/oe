@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+print_help() {
+    cat <<EOF
+opencode-environment local CLI
+
+Usage:
+  ./bin/oe <command>
+
+Commands:
+  setup     Initialize local environment configuration
+  doctor    Validate local machine and environment readiness
+  help      Show this help message
+
+Examples:
+  ./bin/oe setup
+  ./bin/oe doctor
+EOF
+}
+
+fail() {
+    printf '\033[0;31m  ✗ %s\033[0m\n' "$*" >&2
+    echo
+    print_help
+    exit 1
+}
+
+main() {
+    local cmd="${1:-help}"
+
+    case "$cmd" in
+        setup)
+            exec "$REPO_ROOT/dev/scripts/setup.sh"
+            ;;
+        doctor)
+            exec "$REPO_ROOT/dev/scripts/doctor.sh"
+            ;;
+        help|--help|-h)
+            print_help
+            ;;
+        *)
+            printf '\033[0;31m  ✗ Unknown command: %s\033[0m\n' "$cmd" >&2
+            echo
+            print_help
+            exit 1
+            ;;
+    esac
+}
+
+main "$@"
