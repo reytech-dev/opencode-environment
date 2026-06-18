@@ -1,0 +1,345 @@
+# opencode-environment
+
+A reproducible local development environment for agentic software development with [opencode](https://opencode.ai/).
+
+This repository is not an application template.
+
+It is a Docker Compose-based **agentic development workbench**. It gives you a controlled local environment with dedicated runner containers, shared workspace folders, infrastructure services, and an opencode runtime. Application repositories are created or attached later in the workflow.
+
+## What this gives you
+
+* An isolated opencode runtime
+* Docker-based runner containers for backend, frontend, infrastructure, and E2E workflows
+* Local infrastructure services for development
+* A predictable workspace layout for future application repositories
+* A command policy that keeps project tooling out of the host machine
+
+## 5-minute quickstart
+
+### 1. Bootstrap the environment
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/reytech-dev/opencode-environment/main/install.sh | bash
+```
+
+This downloads the bootstrap script, clones the repository, and sets up your local workbench. Follow the interactive prompts to choose a directory name and version.
+
+To skip prompts, pass the directory and version directly:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/reytech-dev/opencode-environment/main/install.sh | bash -s -- my-workbench --version latest
+```
+
+### 2. Run setup
+
+```bash
+./bin/oe setup
+```
+
+The setup command initializes your local environment.
+
+It should:
+
+* create `.env` from `.env.template`
+* generate local tokens where possible
+* ask for optional API credentials
+* create required workspace folders
+* configure the absolute project path
+* prepare the environment for Docker Compose
+
+### 3. Check your machine
+
+```bash
+./bin/oe doctor
+```
+
+The doctor command validates that the local environment can run.
+
+It should check:
+
+* Docker is installed and reachable
+* Docker Compose is available
+* required ports are free
+* `.env` exists
+* workspace folders exist
+* runner scripts are executable
+* required containers can be built or started
+
+### 4. Start the environment
+
+```bash
+./bin/oe start
+```
+
+This starts the local development workbench.
+
+The environment includes services such as:
+
+* PostgreSQL
+* MinIO
+* Mailpit
+* Prometheus
+* Open Design
+* opencode
+* backend runner
+* frontend runner
+* infrastructure runner
+* Playwright runner
+
+### 5. Verify readiness
+
+```bash
+./bin/oe status
+```
+
+A healthy environment should report that the core services, runner containers, workspace folders, and local configuration are ready.
+
+### 6. Enter the opencode environment
+
+```bash
+./bin/oe enter
+```
+
+You are now inside the agentic development environment.
+
+At this point, no application repositories need to exist yet. You can use the environment to plan the product, define architecture, create repositories, attach existing repositories, or start an agent-driven implementation workflow.
+
+## Install a specific version
+
+By default the bootstrap installs the latest GitHub release. To pin a specific version, use the `--version` flag:
+
+```bash
+# Interactive prompt (press Enter for latest tag):
+curl -fsSL https://raw.githubusercontent.com/reytech-dev/opencode-environment/main/install.sh | bash
+
+# Direct install of a specific version:
+./install.sh my-workbench --version v1.0.0
+
+# Install the latest release:
+./install.sh my-workbench --version latest
+```
+
+If you already cloned the repository manually, you can also check out a specific tag:
+
+```bash
+git fetch --tags
+git checkout v1.0.0
+./bin/oe setup
+./bin/oe doctor
+```
+
+## Workspace layout
+
+Application code does not live directly in the root of this repository.
+
+Use the `workspace/` directory as the staging area for application repositories:
+
+```text
+workspace/
+  backend/          Java backend repositories go here later
+  frontend/         Node.js / frontend repositories go here later
+  infrastructure/   OpenTofu / infrastructure repositories go here later
+```
+
+These folders are intentionally empty in the blueprint.
+
+Later in the workflow, repositories may be created or attached like this:
+
+```text
+workspace/backend/my-api
+workspace/frontend/my-web
+workspace/infrastructure/my-infra
+```
+
+## Command policy
+
+Do not run project tooling directly on the host machine.
+
+Do not run commands such as these directly from your laptop shell:
+
+```bash
+pnpm install
+npm test
+npx playwright test
+./gradlew test
+tofu plan
+docker compose up
+```
+
+Instead, use the environment commands and runner scripts from the project root.
+
+Preferred entrypoint:
+
+```bash
+./bin/oe <command>
+```
+
+Lower-level script entrypoints:
+
+```bash
+./dev/scripts/wrapper.sh <command>
+./dev/scripts/exec.sh <command>
+```
+
+This keeps tooling versions reproducible and ensures commands run inside the appropriate container.
+
+## Common commands
+
+```bash
+./bin/oe setup      # Initialize local configuration
+./bin/oe doctor     # Validate the local machine and environment
+./bin/oe start      # Start the environment
+./bin/oe status     # Show environment readiness
+./bin/oe logs       # Show service logs
+./bin/oe enter      # Enter the opencode runtime
+./bin/oe stop       # Stop the environment
+./bin/oe reset      # Clean up local runner/container state
+```
+
+## Working with future repositories
+
+Backend, frontend, and infrastructure repositories are added later.
+
+Until then, the environment can still be used for:
+
+* product planning
+* architecture design
+* agent workflow validation
+* tool verification
+* local infrastructure testing
+* repository creation planning
+* onboarding new developers into the agentic workflow
+
+When repositories exist, commands should target the correct workspace lane.
+
+Example backend command:
+
+```bash
+./dev/scripts/wrapper.sh backend:test my-api
+```
+
+Example frontend command:
+
+```bash
+./dev/scripts/wrapper.sh frontend:build my-web
+```
+
+Example infrastructure command:
+
+```bash
+./dev/scripts/wrapper.sh infrastructure:plan my-infra
+```
+
+## Configuration
+
+Local configuration lives in:
+
+```text
+.env
+```
+
+Create it from:
+
+```text
+.env.template
+```
+
+The `.env` file may contain local credentials and must not be committed.
+
+Typical configuration includes:
+
+* PostgreSQL settings
+* MinIO settings
+* Open Design settings
+* opencode provider keys
+* Context7 API key
+* GitHub username and token
+* local service ports
+
+## Local services
+
+Default service ports:
+
+| Service       | Default port | Purpose                      |
+| ------------- | -----------: | ---------------------------- |
+| PostgreSQL    |         5432 | Local database               |
+| MinIO API     |         9000 | S3-compatible object storage |
+| MinIO Console |         9001 | Object storage UI            |
+| Prometheus    |         9090 | Metrics                      |
+| Open Design   |         7456 | Design and review workflow   |
+
+Ports can be changed in `.env`.
+
+## Runner environments
+
+The environment provides dedicated runners for different work types.
+
+| Runner                | Purpose                        |
+| --------------------- | ------------------------------ |
+| opencode              | Agentic development runtime    |
+| backend runner        | Java backend development       |
+| frontend runner       | Node.js / frontend development |
+| infrastructure runner | OpenTofu infrastructure work   |
+| Playwright runner     | End-to-end browser tests       |
+
+Use the matching runner for the work you are doing.
+
+## First successful onboarding
+
+You are successfully onboarded when this works:
+
+```bash
+./bin/oe setup
+./bin/oe doctor
+./bin/oe start
+./bin/oe status
+./bin/oe enter
+```
+
+After that, the environment is ready for the next stage: creating or attaching application repositories.
+
+## Troubleshooting
+
+### Docker is not reachable
+
+Start Docker Desktop or your local Docker daemon, then run:
+
+```bash
+./bin/oe doctor
+```
+
+### A port is already in use
+
+Change the conflicting port in `.env`, then restart the environment:
+
+```bash
+./bin/oe stop
+./bin/oe start
+```
+
+### The workspace folders are missing
+
+Run setup again:
+
+```bash
+./bin/oe setup
+```
+
+### Containers are in a broken state
+
+Reset local runner/container state:
+
+```bash
+./bin/oe reset
+./bin/oe start
+```
+
+## Mental model
+
+Think of this repository as the **workbench**, not the product.
+
+The workbench starts first.
+
+Product repositories come later.
+
+Agents then use the workbench to inspect, create, modify, test, and operate those repositories in a reproducible local environment.
