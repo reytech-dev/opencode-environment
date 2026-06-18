@@ -1,3 +1,9 @@
+## [1.6.0](https://github.com/reytech-dev/opencode-environment/compare/v1.5.0...v1.6.0) (2026-06-18)
+
+### Features
+
+* **setup:** add cleanup to setup script steps ([fa8dc0d](https://github.com/reytech-dev/opencode-environment/commit/fa8dc0d855f7298db6172358e8e3a82cf336c146))
+
 ## [1.5.0](https://github.com/reytech-dev/opencode-environment/compare/v1.4.0...v1.5.0) (2026-06-18)
 
 ### Features
