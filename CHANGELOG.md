@@ -1,3 +1,14 @@
+## [1.1.0](https://github.com/reytech-dev/opencode-environment/compare/v1.0.0...v1.1.0) (2026-06-18)
+
+### Features
+
+* **setup:** add install script and instructions ([994d0e6](https://github.com/reytech-dev/opencode-environment/commit/994d0e6a03924fc023370f007337c2772a1afca4))
+
+### Chores
+
+* **deps-dev:** bump the commitlint group with 2 updates ([6e6346c](https://github.com/reytech-dev/opencode-environment/commit/6e6346cb41b6509ed15ff9d203f1aa512462f4bc))
+* **deps-dev:** bump the semantic-release group with 2 updates ([19dc3bd](https://github.com/reytech-dev/opencode-environment/commit/19dc3bd56e5ed7f3020f7a75091b76366b6d591b))
+
 ## 1.0.0 (2026-06-17)
 
 * chore(.env): update .env template ([e7fd769](https://github.com/reytech-dev/opencode-environment/commit/e7fd769))
