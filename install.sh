@@ -215,6 +215,8 @@ run_setup() {
         (cd "$dir" && ./bin/oe setup) || warn "./bin/oe setup exited with code $?"
         log "Running doctor..."
         (cd "$dir" && ./bin/oe doctor) || warn "./bin/oe doctor exited with code $?"
+        log "Running cleanup..."
+        (cd "$dir" && ./bin/oe cleanup) || warn "./bin/oe cleanup exited with code $?"
     else
         warn "./bin/oe not available yet — using fallback setup"
 
