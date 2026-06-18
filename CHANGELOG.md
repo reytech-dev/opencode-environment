@@ -1,3 +1,9 @@
+## [1.3.0](https://github.com/reytech-dev/opencode-environment/compare/v1.2.1...v1.3.0) (2026-06-18)
+
+### Features
+
+* **setup:** add prompts for optional env variables ([fe296d5](https://github.com/reytech-dev/opencode-environment/commit/fe296d58ed6dc3409e49383f5ab72b813b15dd25))
+
 ## [1.2.1](https://github.com/reytech-dev/opencode-environment/compare/v1.2.0...v1.2.1) (2026-06-18)
 
 ### Bug Fixes
