@@ -236,6 +236,18 @@ main() {
     log_info "  ./bin/oe doctor"
     log_info "  ./bin/oe start"
     echo
+
+    local interactive=false
+    [[ -t 1 ]] && [[ -e /dev/tty ]] && interactive=true
+
+    if $interactive; then
+        printf 'Remove bootstrap artifacts (install.sh, .git/, LICENSE, etc.)? [y/N]: ' > /dev/tty
+        read -r answer < /dev/tty
+        if [[ "$answer" == "y" ]] || [[ "$answer" == "Y" ]]; then
+            echo
+            "$REPO_ROOT/dev/scripts/cleanup.sh" --force
+        fi
+    fi
 }
 
 main "$@"
