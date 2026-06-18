@@ -1,3 +1,9 @@
+## [1.2.0](https://github.com/reytech-dev/opencode-environment/compare/v1.1.0...v1.2.0) (2026-06-18)
+
+### Features
+
+* **setup:** add setup and doctor scripts ([67a7af4](https://github.com/reytech-dev/opencode-environment/commit/67a7af4a76888e751631833cd263b257c2350c0e))
+
 ## [1.1.0](https://github.com/reytech-dev/opencode-environment/compare/v1.0.0...v1.1.0) (2026-06-18)
 
 ### Features
