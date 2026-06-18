@@ -14,11 +14,13 @@ Usage:
 Commands:
   setup     Initialize local environment configuration
   doctor    Validate local machine and environment readiness
+  cleanup   Remove bootstrap artifacts from the workbench
   help      Show this help message
 
 Examples:
   ./bin/oe setup
   ./bin/oe doctor
+  ./bin/oe cleanup
 EOF
 }
 
@@ -34,10 +36,13 @@ main() {
 
     case "$cmd" in
         setup)
-            exec "$REPO_ROOT/dev/scripts/setup.sh"
+            shift; exec "$REPO_ROOT/dev/scripts/setup.sh" "$@"
             ;;
         doctor)
-            exec "$REPO_ROOT/dev/scripts/doctor.sh"
+            shift; exec "$REPO_ROOT/dev/scripts/doctor.sh" "$@"
+            ;;
+        cleanup)
+            shift; exec "$REPO_ROOT/dev/scripts/cleanup.sh" "$@"
             ;;
         help|--help|-h)
             print_help
