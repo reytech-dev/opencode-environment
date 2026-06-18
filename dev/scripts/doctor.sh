@@ -47,6 +47,11 @@ is_shell_expression() {
     [[ "$val" == *'$(openssl'* ]]
 }
 
+is_placeholder() {
+    local val="$1"
+    [[ "$val" == "<"*">" ]]
+}
+
 # --------------------------------------------------------------------
 # Port checking (ss → lsof → bash /dev/tcp)
 # --------------------------------------------------------------------
@@ -176,7 +181,7 @@ GITHUB_USERNAME:GitHub integration may be unavailable"
     for cred in $opt_creds; do
         local val
         val=$(read_env_value "$cred" || true)
-        if [[ -z "$val" ]]; then
+        if [[ -z "$val" ]] || is_placeholder "$val"; then
             local label
             label=$(echo "$opt_labels" | grep "^${cred}:" | sed "s|^${cred}:||")
             report_warn "${cred} is not set; ${label}"

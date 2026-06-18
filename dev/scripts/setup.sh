@@ -63,6 +63,11 @@ is_shell_expression() {
     [[ "$val" == *'$(openssl'* ]]
 }
 
+is_placeholder() {
+    local val="$1"
+    [[ "$val" == "<"*">" ]]
+}
+
 generate_token() {
     if command_exists openssl; then
         openssl rand -hex 32
@@ -162,6 +167,51 @@ EOF
 }
 
 # --------------------------------------------------------------------
+# Optional credentials
+# --------------------------------------------------------------------
+
+prompt_optional_credentials() {
+    local interactive=false
+    [[ -t 1 ]] && [[ -e /dev/tty ]] && interactive=true
+
+    if ! $interactive; then
+        log_info "Skipping optional credential prompts (non-interactive)"
+        return
+    fi
+
+    local creds=(
+        "DEEPSEEK_API_KEY|DeepSeek API key (opencode AI provider)"
+        "CONTEXT7_API_KEY|Context7 API key (documentation integration)"
+        "GITHUB_USERNAME|GitHub username"
+        "GITHUB_TOKEN|GitHub personal access token"
+    )
+
+    echo
+    log_info "Optional credentials (press Enter to skip):"
+    echo
+
+    for entry in "${creds[@]}"; do
+        local key="${entry%%|*}"
+        local label="${entry#*|}"
+        local current
+        current=$(read_env_value "$key" "$REPO_ROOT/.env" || true)
+
+        if [[ -z "$current" ]] || is_placeholder "$current"; then
+            printf '  %s (%s) []: ' "$key" "$label" > /dev/tty
+        else
+            printf '  %s (%s) [configured]: ' "$key" "$label" > /dev/tty
+        fi
+
+        read -r user_input < /dev/tty
+
+        if [[ -n "$user_input" ]]; then
+            set_env_value "$key" "$user_input" "$REPO_ROOT/.env"
+            log_success "$key configured"
+        fi
+    done
+}
+
+# --------------------------------------------------------------------
 # Main
 # --------------------------------------------------------------------
 
@@ -176,6 +226,7 @@ main() {
     setup_workspace_dirs
     setup_host_project_dir
     setup_open_design_token
+    prompt_optional_credentials
     setup_state_file
 
     echo
