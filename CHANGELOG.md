@@ -1,3 +1,9 @@
+## [1.2.1](https://github.com/reytech-dev/opencode-environment/compare/v1.2.0...v1.2.1) (2026-06-18)
+
+### Bug Fixes
+
+* **setup:** add missing HOST_PROJECT_DIR env in template ([30c98c9](https://github.com/reytech-dev/opencode-environment/commit/30c98c9df535a41883fd3677e811bf53c754feef))
+
 ## [1.2.0](https://github.com/reytech-dev/opencode-environment/compare/v1.1.0...v1.2.0) (2026-06-18)
 
 ### Features
