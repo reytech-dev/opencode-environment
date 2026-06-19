@@ -1,3 +1,9 @@
+## [1.11.3](https://github.com/reytech-dev/opencode-environment/compare/v1.11.2...v1.11.3) (2026-06-19)
+
+### Bug Fixes
+
+* **setup:** enter opencode directly after start entrypoint ([c36100e](https://github.com/reytech-dev/opencode-environment/commit/c36100e10f6c61f6a16940bf0741f3d2af84c43b))
+
 ## [1.11.2](https://github.com/reytech-dev/opencode-environment/compare/v1.11.1...v1.11.2) (2026-06-19)
 
 ### Bug Fixes
