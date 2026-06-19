@@ -1,3 +1,9 @@
+## [1.11.5](https://github.com/reytech-dev/opencode-environment/compare/v1.11.4...v1.11.5) (2026-06-19)
+
+### Bug Fixes
+
+* **setup:** set init branch to main ([2caa865](https://github.com/reytech-dev/opencode-environment/commit/2caa865b1f021c9274e7caf203dcdd2e34003f68))
+
 ## [1.11.4](https://github.com/reytech-dev/opencode-environment/compare/v1.11.3...v1.11.4) (2026-06-19)
 
 ### Bug Fixes
