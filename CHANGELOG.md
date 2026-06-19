@@ -1,3 +1,15 @@
+## [1.8.0](https://github.com/reytech-dev/opencode-environment/compare/v1.7.0...v1.8.0) (2026-06-19)
+
+### Features
+
+* **setup:** add start script for environment ([bc89312](https://github.com/reytech-dev/opencode-environment/commit/bc893129fa73c3ac8c3d04b3df3e4f6bae26c732))
+
+### Chores
+
+* **config:** add mailpit port config to .env.template ([38a7be6](https://github.com/reytech-dev/opencode-environment/commit/38a7be6c8081f02fa4d79d28cc0f3904541e0668))
+* **config:** add mailpit port config to .env.template ([d9f3c04](https://github.com/reytech-dev/opencode-environment/commit/d9f3c0495045cd64c13a30c5c78a2425dfeaefb2))
+* **opencode:** add specify command to opencode agent ([13f19c0](https://github.com/reytech-dev/opencode-environment/commit/13f19c0f6aa8654e9fcce8abd24e9a90f7f0dcb3))
+
 ## [1.7.0](https://github.com/reytech-dev/opencode-environment/compare/v1.6.0...v1.7.0) (2026-06-19)
 
 ### Features
