@@ -16,7 +16,17 @@ These directories are mounted into their respective Docker runner containers at 
 
 ## Command Policy
 
-**All tooling commands must run inside the appropriate Docker runner container.** Do NOT invoke `pnpm`, `npm`, `node`, `npx`, `gradlew`, `tofu`, or similar project tooling binaries directly on the host or opencode container. Always route through the project scripts executed from the project root:
+### Environment management
+
+Use `./bin/oe` from the project root to control the workbench lifecycle:
+
+```bash
+./bin/oe <command>
+```
+
+### Agent tooling
+
+**All project tooling commands must run inside the appropriate Docker runner container.** Do NOT invoke `pnpm`, `npm`, `node`, `npx`, `gradlew`, `tofu`, or similar project tooling binaries directly on the host or opencode container. Always route through the project scripts executed from the project root:
 
 - **`./dev/scripts/wrapper.sh <command>`** — Preferred. Use for named, predefined operations (test, build, run, etc.).
 - **`./dev/scripts/exec.sh <command>`** — Fallback. Use when the wrapper doesn't cover the needed operation. Also provides shell access and compose diagnostics.
@@ -24,6 +34,18 @@ These directories are mounted into their respective Docker runner containers at 
 **Never run raw `docker compose` commands directly.**
 
 Both scripts are executed from the **project root** (`/workspace` inside the opencode container, or the repository root on the host).
+
+## Environment Management
+
+`./bin/oe` manages the workbench lifecycle from the project root:
+
+| Command | Action |
+|---|---|
+| `./bin/oe setup` | Initialize `.env` from template, create workspace dirs, configure required variables, generate tokens |
+| `./bin/oe doctor` | Validate Docker daemon, Docker Compose, port availability, `.env` configuration, scripts, and Compose config |
+| `./bin/oe start` | Start the workbench (preflight → port check → `docker compose up -d` → service readiness checks → URLs) |
+| `./bin/oe cleanup` | Remove bootstrap artifacts from the workbench |
+| `./bin/oe help` | Show help message |
 
 ## Commands Reference
 
@@ -162,7 +184,7 @@ An optional subdirectory can be passed to open a shell in a specific project:
 ### Playwright Runner (`playwright-runner`)
 - Microsoft Playwright image
 - Used for E2E tests against the frontend
-- Environment: `BASE_URL=http://node-runner:3000`, `CI=true`
+- Environment: `FRONTEND_URL=http://node-runner:5173`, `CI=true`
 
 ### Opencode Runner (`opencode`)
 - Node.js 22 + Docker CLI + Docker Compose plugin
@@ -175,6 +197,7 @@ An optional subdirectory can be passed to open a shell in a specific project:
 | File | Purpose |
 |---|---|
 | `.env` | All configurable values (API keys, ports, credentials, versions). **Excluded from git.** |
+| `.env.template` | Template for `.env` with placeholder values; committed to git |
 | `docker-compose.yaml` | Service definitions, volume mounts, environment variables with `${VAR:-default}` interpolation |
 | `dev/runners/opencode/opencode.json` | Opencode AI configuration (Context7 MCP remote, DeepSeek provider) |
 
@@ -184,7 +207,7 @@ An optional subdirectory can be passed to open a shell in a specific project:
 |---|---|---|
 | PostgreSQL 18 | `5432` (configurable via `POSTGRES_PORT`) | Credentials in `.env`; healthcheck enabled |
 | MinIO (S3-compatible) | `9000` (API), `9001` (console) | Console port configurable via `MINIO_CONSOLE_PORT`; healthcheck enabled |
-| Mailpit (SMTP capture) | — | Catches all outbound email; web UI available |
+| Mailpit (SMTP capture) | `1025` (SMTP), `8025` (web UI, configurable via `MAILPIT_HTTP_PORT`) | Catches all outbound email; web UI available |
 | Prometheus | `9090` (configurable via `PROMETHEUS_PORT`) | Scrapes backend `/actuator/prometheus` |
 | Open Design | `7456` (configurable via `OPEN_DESIGN_PORT`) | Design/review tool; uses host network mode |
 

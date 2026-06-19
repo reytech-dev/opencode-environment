@@ -44,6 +44,7 @@ It should:
 * generate local tokens where possible
 * create required workspace folders
 * configure the absolute project path
+* configure the Compose project name
 * prepare the environment for Docker Compose
 
 Setup does not create application repositories or start Docker services. Backend, frontend, and infrastructure repositories come later.
@@ -61,7 +62,7 @@ It should check:
 * Docker is installed and reachable
 * Docker Compose is available
 * required ports are free
-* `.env` exists
+* `.env` exists and required variables (HOST_PROJECT_DIR, OPEN_DESIGN_API_TOKEN, COMPOSE_PROJECT_NAME) are configured
 * workspace folders exist
 * runner scripts are executable
 
@@ -87,22 +88,6 @@ The environment includes services such as:
 * frontend runner
 * infrastructure runner
 * Playwright runner
-
-### 5. Verify readiness
-
-```bash
-./bin/oe status
-```
-
-A healthy environment should report that the core services, runner containers, workspace folders, and local configuration are ready.
-
-### 6. Enter the opencode environment
-
-```bash
-./bin/oe enter
-```
-
-You are now inside the agentic development environment.
 
 At this point, no application repositories need to exist yet. You can use the environment to plan the product, define architecture, create repositories, attach existing repositories, or start an agent-driven implementation workflow.
 
@@ -190,12 +175,9 @@ This keeps tooling versions reproducible and ensures commands run inside the app
 ```bash
 ./bin/oe setup      # Initialize local configuration
 ./bin/oe doctor     # Validate the local machine and environment
-./bin/oe start      # Start the environment
-./bin/oe status     # Show environment readiness
-./bin/oe logs       # Show service logs
-./bin/oe enter      # Enter the opencode runtime
-./bin/oe stop       # Stop the environment
-./bin/oe reset      # Clean up local runner/container state
+./bin/oe start      # Start the Docker Compose workbench
+./bin/oe cleanup    # Remove bootstrap artifacts
+./bin/oe help       # Show help message
 ```
 
 ## Working with future repositories
@@ -256,6 +238,7 @@ Typical configuration includes:
 * opencode provider keys
 * Context7 API key
 * GitHub username and token
+* Compose project name
 * local service ports
 
 ## Local services
@@ -267,6 +250,7 @@ Default service ports:
 | PostgreSQL    |         5432 | Local database               |
 | MinIO API     |         9000 | S3-compatible object storage |
 | MinIO Console |         9001 | Object storage UI            |
+| Mailpit       |         8025 | Email capture and testing    |
 | Prometheus    |         9090 | Metrics                      |
 | Open Design   |         7456 | Design and review workflow   |
 
@@ -294,8 +278,6 @@ You are successfully onboarded when this works:
 ./bin/oe setup
 ./bin/oe doctor
 ./bin/oe start
-./bin/oe status
-./bin/oe enter
 ```
 
 After that, the environment is ready for the next stage: creating or attaching application repositories.
@@ -315,7 +297,7 @@ Start Docker Desktop or your local Docker daemon, then run:
 Change the conflicting port in `.env`, then restart the environment:
 
 ```bash
-./bin/oe stop
+docker compose down
 ./bin/oe start
 ```
 
@@ -332,7 +314,7 @@ Run setup again:
 Reset local runner/container state:
 
 ```bash
-./bin/oe reset
+./bin/oe cleanup
 ./bin/oe start
 ```
 
