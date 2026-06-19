@@ -48,5 +48,11 @@ WORKDIR /workspace
 # Install uv
 COPY --from=ghcr.io/astral-sh/uv:0.11.22 /uv /uvx /bin/
 
+COPY dev/runners/opencode/entrypoint.sh /usr/local/bin/opencode-entrypoint.sh
+RUN chmod +x /usr/local/bin/opencode-entrypoint.sh
+
 USER "${NON_ROOT_USERNAME}"
 RUN /bin/uv tool install specify-cli --from git+https://github.com/github/spec-kit.git@${SPECKIT_VERSION}
+
+ENTRYPOINT ["/usr/local/bin/opencode-entrypoint.sh"]
+CMD ["sleep", "infinity"]

@@ -16,12 +16,14 @@ Commands:
   doctor    Validate local machine and environment readiness
   cleanup   Remove bootstrap artifacts from the workbench
   start     Start the Docker Compose workbench
+  enter     Enter the running opencode runtime
   help      Show this help message
 
 Examples:
   ./bin/oe setup
   ./bin/oe doctor
   ./bin/oe start
+  ./bin/oe enter
   ./bin/oe cleanup
 EOF
 }
@@ -48,6 +50,9 @@ main() {
             ;;
         start)
             shift; exec "$REPO_ROOT/dev/scripts/start.sh" "$@"
+            ;;
+        enter)
+            shift; exec "$REPO_ROOT/dev/scripts/enter.sh" "$@"
             ;;
         help|--help|-h)
             print_help
