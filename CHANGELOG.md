@@ -1,3 +1,9 @@
+## [1.11.2](https://github.com/reytech-dev/opencode-environment/compare/v1.11.1...v1.11.2) (2026-06-19)
+
+### Bug Fixes
+
+* **setup:** update spec-kit-workspace-materialize version & update specify command ([910f9cf](https://github.com/reytech-dev/opencode-environment/commit/910f9cf8995eca8d6b0860cbcab6f450081ee427))
+
 ## [1.11.1](https://github.com/reytech-dev/opencode-environment/compare/v1.11.0...v1.11.1) (2026-06-19)
 
 ### Bug Fixes
