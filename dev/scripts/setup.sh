@@ -119,6 +119,20 @@ setup_workspace_dirs() {
     fi
 }
 
+setup_compose_project_name() {
+    local env_file="$REPO_ROOT/.env"
+    local current
+    current=$(read_env_value COMPOSE_PROJECT_NAME "$env_file")
+
+    if [[ -n "$current" ]] && ! is_placeholder "$current"; then
+        log_success "COMPOSE_PROJECT_NAME is already configured"
+        return
+    fi
+
+    set_env_value COMPOSE_PROJECT_NAME "opencode-environment" "$env_file"
+    log_success "Set COMPOSE_PROJECT_NAME to opencode-environment"
+}
+
 setup_host_project_dir() {
     local env_file="$REPO_ROOT/.env"
     local current
@@ -225,6 +239,7 @@ main() {
     setup_env_file
     setup_workspace_dirs
     setup_host_project_dir
+    setup_compose_project_name
     setup_open_design_token
     prompt_optional_credentials
     setup_state_file

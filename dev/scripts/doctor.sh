@@ -171,6 +171,17 @@ check_configuration() {
         report_ok "OPEN_DESIGN_API_TOKEN is configured"
     fi
 
+    # COMPOSE_PROJECT_NAME
+    local project_name
+    project_name=$(read_env_value COMPOSE_PROJECT_NAME || true)
+    if [[ -z "$project_name" ]]; then
+        report_fail "COMPOSE_PROJECT_NAME is missing or empty"
+    elif is_placeholder "$project_name"; then
+        report_fail "COMPOSE_PROJECT_NAME is not configured — run ./bin/oe setup"
+    else
+        report_ok "COMPOSE_PROJECT_NAME is configured"
+    fi
+
     # Optional credentials (warn only)
     local opt_creds="DEEPSEEK_API_KEY CONTEXT7_API_KEY GITHUB_TOKEN GITHUB_USERNAME"
     local opt_labels="DEEPSEEK_API_KEY:opencode provider setup may be incomplete
