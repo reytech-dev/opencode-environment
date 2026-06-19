@@ -260,7 +260,7 @@ print_next_steps() {
     echo "Next:"
     echo "  cd $TARGET_DIR"
     echo "  ./bin/oe start"
-    echo "  ./bin/oe enter"
+    echo "  ./bin/oe enter -- opencode"
     echo
 }
 

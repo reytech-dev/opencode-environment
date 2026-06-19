@@ -455,7 +455,7 @@ print_urls() {
 print_next_steps() {
     echo
     echo "Next:"
-    log_info "./bin/oe enter"
+    log_info "./bin/oe enter -- opencode"
     echo
 }
 
