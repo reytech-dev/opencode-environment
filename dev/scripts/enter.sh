@@ -41,33 +41,6 @@ service_exists() {
     "${COMPOSE_CMD[@]}" config --services 2>/dev/null | grep -qxF "$service"
 }
 
-container_id_for_service() {
-    local service="$1"
-    "${COMPOSE_CMD[@]}" ps -q "$service" 2>/dev/null || true
-}
-
-container_running() {
-    local container_id="$1"
-    [[ -z "$container_id" ]] && return 1
-    local state
-    state=$(docker inspect -f '{{.State.Status}}' "$container_id" 2>/dev/null || echo "missing")
-    [[ "$state" == "running" ]]
-}
-
-container_has_path() {
-    local container_id="$1"
-    local path="$2"
-    [[ -z "$container_id" ]] && return 1
-    docker exec "$container_id" test -d "$path" 2>/dev/null
-}
-
-container_has_command() {
-    local container_id="$1"
-    local cmd="$2"
-    [[ -z "$container_id" ]] && return 1
-    docker exec "$container_id" which "$cmd" &>/dev/null
-}
-
 # --------------------------------------------------------------------
 # Fail helpers
 # --------------------------------------------------------------------
@@ -116,39 +89,16 @@ print_welcome() {
 }
 
 # --------------------------------------------------------------------
-# Shell selection
-# --------------------------------------------------------------------
-
-shell_for_container() {
-    local container_id="$1"
-    if container_has_command "$container_id" "bash"; then
-        echo "bash"
-    else
-        echo "sh"
-    fi
-}
-
-# --------------------------------------------------------------------
 # Entry
 # --------------------------------------------------------------------
 
 enter_shell() {
-    local container_id
-    container_id=$(container_id_for_service "opencode")
-    local shell
-    shell=$(shell_for_container "$container_id")
-
     print_welcome
-
-    exec docker exec -it "$container_id" "$shell"
+    exec "${COMPOSE_CMD[@]}" run --rm opencode bash
 }
 
 run_command() {
-    local container_id
-    container_id=$(container_id_for_service "opencode")
-    shift  # remove the service name
-
-    exec docker exec -it "$container_id" "$@"
+    exec "${COMPOSE_CMD[@]}" run --rm opencode "$@"
 }
 
 # --------------------------------------------------------------------
@@ -205,32 +155,9 @@ enter() {
             "./bin/oe doctor"
     fi
 
-    # 7. opencode container exists and is running
-    local container_id
-    container_id=$(container_id_for_service "opencode")
-    if [[ -z "$container_id" ]]; then
-        fail_enter \
-            "The \"opencode\" container does not exist." \
-            "./bin/oe start"
-    fi
-
-    if ! container_running "$container_id"; then
-        fail_enter \
-            "The \"opencode\" container is not running." \
-            "./bin/oe start"
-    fi
-
-    # 8. /workspace available inside container
-    if ! container_has_path "$container_id" "/workspace"; then
-        fail_enter \
-            "/workspace is not available inside the opencode container." \
-            "Check your Docker Compose volume mounts." \
-            "./bin/oe doctor"
-    fi
-
     # Interactive shell or command mode
     if [[ $# -gt 0 ]]; then
-        run_command "$container_id" "$@"
+        run_command "$@"
     else
         enter_shell
     fi

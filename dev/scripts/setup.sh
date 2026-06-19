@@ -129,8 +129,13 @@ setup_compose_project_name() {
         return
     fi
 
-    set_env_value COMPOSE_PROJECT_NAME "opencode-environment" "$env_file"
-    log_success "Set COMPOSE_PROJECT_NAME to opencode-environment"
+    if [[ -n "${COMPOSE_PROJECT_NAME:-}" ]]; then
+        set_env_value COMPOSE_PROJECT_NAME "$COMPOSE_PROJECT_NAME" "$env_file"
+        log_success "Set COMPOSE_PROJECT_NAME to $COMPOSE_PROJECT_NAME"
+    else
+        set_env_value COMPOSE_PROJECT_NAME "opencode-environment" "$env_file"
+        log_success "Set COMPOSE_PROJECT_NAME to opencode-environment"
+    fi
 }
 
 setup_host_project_dir() {

@@ -210,9 +210,12 @@ clone_repository() {
 run_setup() {
     local dir="$1"
 
+    local project_name
+    project_name=$(basename "$TARGET_DIR")
+
     if [[ -x "$dir/bin/oe" ]]; then
         log "Running setup..."
-        (cd "$dir" && ./bin/oe setup) || warn "./bin/oe setup exited with code $?"
+        (cd "$dir" && COMPOSE_PROJECT_NAME="$project_name" ./bin/oe setup) || warn "./bin/oe setup exited with code $?"
         log "Running doctor..."
         (cd "$dir" && ./bin/oe doctor) || warn "./bin/oe doctor exited with code $?"
     else
@@ -221,6 +224,11 @@ run_setup() {
         if [[ ! -f "$dir/.env" ]] && [[ -f "$dir/.env.template" ]]; then
             cp "$dir/.env.template" "$dir/.env"
             log "Created .env from .env.template"
+        fi
+
+        if [[ -f "$dir/.env" ]]; then
+            sed -i "s|^COMPOSE_PROJECT_NAME=.*|COMPOSE_PROJECT_NAME=\"${project_name}\"|" "$dir/.env"
+            log "Set COMPOSE_PROJECT_NAME to ${project_name}"
         fi
 
         mkdir -p "$dir/workspace/backend" "$dir/workspace/frontend" "$dir/workspace/infrastructure"
