@@ -1,3 +1,9 @@
+## [1.11.4](https://github.com/reytech-dev/opencode-environment/compare/v1.11.3...v1.11.4) (2026-06-19)
+
+### Bug Fixes
+
+* **setup:** add missing git init n entrypoint.sh ([5ff2476](https://github.com/reytech-dev/opencode-environment/commit/5ff2476c5cf22aaa38d58ea085a4201c5de9c40f))
+
 ## [1.11.3](https://github.com/reytech-dev/opencode-environment/compare/v1.11.2...v1.11.3) (2026-06-19)
 
 ### Bug Fixes
