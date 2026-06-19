@@ -1,3 +1,9 @@
+## [1.11.0](https://github.com/reytech-dev/opencode-environment/compare/v1.10.0...v1.11.0) (2026-06-19)
+
+### Features
+
+* **setup:** start opencode container on enter, fix COMPOSE_PROJECT_NAME ([9407bd9](https://github.com/reytech-dev/opencode-environment/commit/9407bd9129ddb30a631ac1c19dbe16d5763cd28d))
+
 ## [1.10.0](https://github.com/reytech-dev/opencode-environment/compare/v1.9.0...v1.10.0) (2026-06-19)
 
 ### Features
