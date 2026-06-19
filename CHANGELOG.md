@@ -1,3 +1,9 @@
+## [1.7.0](https://github.com/reytech-dev/opencode-environment/compare/v1.6.0...v1.7.0) (2026-06-19)
+
+### Features
+
+* **setup:** remove duplicate cleanup prompt ([fe25ce8](https://github.com/reytech-dev/opencode-environment/commit/fe25ce83eba5024442e53792603117cef308bbcd))
+
 ## [1.6.0](https://github.com/reytech-dev/opencode-environment/compare/v1.5.0...v1.6.0) (2026-06-18)
 
 ### Features
