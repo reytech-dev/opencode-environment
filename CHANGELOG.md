@@ -1,3 +1,13 @@
+## [1.9.0](https://github.com/reytech-dev/opencode-environment/compare/v1.8.0...v1.9.0) (2026-06-19)
+
+### Features
+
+* **docs:** add updated README.md and AGENTS.md ([203242c](https://github.com/reytech-dev/opencode-environment/commit/203242cdfcafd06f63e133805b21087900a0cb98))
+
+### Chores
+
+* **setup:** add new env COMPOSE_PROJECT_NAME ([6210167](https://github.com/reytech-dev/opencode-environment/commit/6210167f7546f3e528d89432b4812246b4d1c675))
+
 ## [1.8.0](https://github.com/reytech-dev/opencode-environment/compare/v1.7.0...v1.8.0) (2026-06-19)
 
 ### Features
