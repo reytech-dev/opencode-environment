@@ -1,7 +1,7 @@
 {
   "name": "opencode-environment",
   "private": true,
-  "version": "1.9.0",
+  "version": "1.10.0",
   "devDependencies": {
     "semantic-release": "^25.0.5",
     "@semantic-release/changelog": "^6.0.3",

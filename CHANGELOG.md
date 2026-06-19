@@ -1,3 +1,9 @@
+## [1.10.0](https://github.com/reytech-dev/opencode-environment/compare/v1.9.0...v1.10.0) (2026-06-19)
+
+### Features
+
+* **setup:** add specify init & extension setup ([21f4988](https://github.com/reytech-dev/opencode-environment/commit/21f4988b59e23bb7fbc37c5e3beabdb1e1eab175))
+
 ## [1.9.0](https://github.com/reytech-dev/opencode-environment/compare/v1.8.0...v1.9.0) (2026-06-19)
 
 ### Features
