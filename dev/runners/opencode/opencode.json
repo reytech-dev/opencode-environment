@@ -22,13 +22,16 @@
     "bash": {
       "docker compose*": "deny",
       "docker-compose*": "deny",
+      "uv *": "deny",
       "pnpm *": "deny",
       "npm *": "deny",
       "npx *": "deny",
       "node *": "deny",
       "./gradlew *": "deny",
       "gradlew *": "deny",
-      "tofu *": "deny"
+      "tofu *": "deny",
+      "java *": "deny"
     }
-  }
+  },
+  "autoupdate": false
 }
