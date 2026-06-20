@@ -1,3 +1,9 @@
+## [1.12.0](https://github.com/reytech-dev/opencode-environment/compare/v1.11.5...v1.12.0) (2026-06-20)
+
+### Features
+
+* **opencode:** add gh cli to opencode runner ([65354a9](https://github.com/reytech-dev/opencode-environment/commit/65354a9ca8c9327d421356c91ccc3b8c8c60ecdb))
+
 ## [1.11.5](https://github.com/reytech-dev/opencode-environment/compare/v1.11.4...v1.11.5) (2026-06-19)
 
 ### Bug Fixes
