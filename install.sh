@@ -278,7 +278,7 @@ main() {
     resolve_latest_version
     validate_version
     clone_repository
-    run_setup "$TARGET_DIR"
+    run_setup "${TARGET_DIR,,}"
     print_next_steps
 }
 
