@@ -1,3 +1,18 @@
+## [1.13.0](https://github.com/reytech-dev/opencode-environment/compare/v1.12.0...v1.13.0) (2026-06-24)
+
+### Features
+
+* **open-design:** add visual open-design processing ([103d255](https://github.com/reytech-dev/opencode-environment/commit/103d255366dc4957e52e2e259528c0478b81ea46))
+
+### Bug Fixes
+
+* **install:** force lowercase docker compose name ([0373728](https://github.com/reytech-dev/opencode-environment/commit/0373728364182c0fdcd52c0455c2c09c95850962))
+
+### Chores
+
+* **setup:** add learnings from workbench usage ([cfea049](https://github.com/reytech-dev/opencode-environment/commit/cfea0499d05f9c3da5a05ef529256f03acacfa57))
+* **visual:** remove demo for design context test ([70ef618](https://github.com/reytech-dev/opencode-environment/commit/70ef618387d101f749d41d0745dc078c88a3c591))
+
 ## [1.12.0](https://github.com/reytech-dev/opencode-environment/compare/v1.11.5...v1.12.0) (2026-06-20)
 
 ### Features
