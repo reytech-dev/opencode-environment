@@ -8,7 +8,7 @@ if [[ ! -f "$SENTINEL" ]]; then
     cd /workspace
     specify init --here --integration opencode --script sh --force
     specify extension add --from https://github.com/reytech-dev/spec-kit-draft/archive/refs/tags/v1.2.0.zip spec-kit-draft
-    specify extension add --from https://github.com/reytech-dev/spec-kit-open-design/archive/refs/tags/v1.1.1.zip spec-kit-open-design
+    specify extension add --from https://github.com/reytech-dev/spec-kit-open-design/archive/refs/tags/v1.2.0.zip spec-kit-open-design
     specify extension add --from https://github.com/reytech-dev/spec-kit-workspace-map/archive/refs/tags/v1.0.0.zip spec-kit-workspace-map
     specify extension add --from https://github.com/reytech-dev/spec-kit-workspace-materialize/archive/refs/tags/v1.0.2.zip spec-kit-workspace-materialize
     git init /workspace -b main
