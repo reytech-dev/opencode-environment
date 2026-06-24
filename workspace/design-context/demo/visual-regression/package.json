@@ -1,8 +1,0 @@
-{
-  "private": true,
-  "scripts": {
-    "capture": "node -e \"console.log('capture ok')\"",
-    "compare": "node -e \"console.log('compare ok')\"",
-    "update": "node -e \"console.log('update ok')\""
-  }
-}
