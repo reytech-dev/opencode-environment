@@ -126,6 +126,7 @@ workspace/
   backend/          Java backend repositories go here later
   frontend/         Node.js / frontend repositories go here later
   infrastructure/   OpenTofu / infrastructure repositories go here later
+  design-context/   Open Design processing artifacts before application repositories exist
 ```
 
 These folders are intentionally empty in the blueprint.
