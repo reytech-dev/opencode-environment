@@ -305,7 +305,7 @@ preflight() {
 
 ensure_workspace_dirs() {
     local needed=false
-    for sub in backend frontend infrastructure; do
+    for sub in backend frontend infrastructure design-context; do
         if [[ ! -d "$REPO_ROOT/workspace/$sub" ]]; then
             mkdir -p "$REPO_ROOT/workspace/$sub"
             needed=true

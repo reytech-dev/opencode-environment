@@ -18,6 +18,8 @@ Commands:
   start     Start the Docker Compose workbench
   enter     Enter the running opencode runtime
   help      Show this help message
+  speckit:visual <project-slug> <capture|compare|update|all> [frontend-repo]
+            Run speckit Open Design visual capture and regression checks
 
 Examples:
   ./bin/oe setup
@@ -53,6 +55,9 @@ main() {
             ;;
         enter)
             shift; exec "$REPO_ROOT/dev/scripts/enter.sh" "$@"
+            ;;
+        speckit:visual)
+            shift; exec "$REPO_ROOT/dev/scripts/wrapper.sh" speckit:visual "$@"
             ;;
         help|--help|-h)
             print_help

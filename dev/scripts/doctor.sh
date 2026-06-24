@@ -126,7 +126,7 @@ check_repository() {
 
     # Workspace dirs
     local ws_ok=true
-    for sub in backend frontend infrastructure; do
+    for sub in backend frontend infrastructure design-context; do
         if [[ ! -d "$REPO_ROOT/workspace/$sub" ]]; then
             ws_ok=false
             break

@@ -231,7 +231,7 @@ run_setup() {
             log "Set COMPOSE_PROJECT_NAME to ${project_name}"
         fi
 
-        mkdir -p "$dir/workspace/backend" "$dir/workspace/frontend" "$dir/workspace/infrastructure"
+        mkdir -p "$dir/workspace/backend" "$dir/workspace/frontend" "$dir/workspace/infrastructure" "$dir/workspace/design-context"
         log "Created workspace directories"
     fi
 }

@@ -100,7 +100,7 @@ setup_env_file() {
 
 setup_workspace_dirs() {
     local changed=false
-    for sub in backend frontend infrastructure; do
+    for sub in backend frontend infrastructure design-context; do
         local dir="$REPO_ROOT/workspace/$sub"
         if [[ ! -d "$dir" ]]; then
             mkdir -p "$dir"

@@ -114,9 +114,9 @@ case "${1:-}" in
   frontend:e2e)
     subdir="${2:-}"
     if [ -n "$subdir" ]; then
-        docker compose run --rm --use-aliases -w "/workspace/$subdir" playwright-runner npm run e2e
+        docker compose run --rm --use-aliases -w "/workspace/frontend/$subdir" playwright-runner npm run e2e
     else
-        docker compose run --rm --use-aliases playwright-runner npm run e2e
+        docker compose run --rm --use-aliases -w "/workspace/frontend" playwright-runner npm run e2e
     fi
     ;;
 
@@ -156,14 +156,86 @@ case "${1:-}" in
     docker compose logs mailpit
     ;;
 
+  database:psql)
+    if [ -n "${2:-}" ]; then
+      docker compose exec postgres psql -U "${POSTGRES_USER:-backend}" -d "${POSTGRES_DB:-backend}" -c "$2"
+    else
+      docker compose exec -it postgres psql -U "${POSTGRES_USER:-backend}" -d "${POSTGRES_DB:-backend}"
+    fi
+    ;;
+
   stack:reset)
     echo "Stopping and removing all project runner containers..."
     docker ps -a --format '{{.ID}} {{.Image}} {{.Names}}' | grep ' workspace-.*-runner' | awk '{print $1}' | sort -u | xargs -r docker rm -f
     echo "Done."
     ;;
 
+  speckit:visual)
+    project="${2:-}"
+    action="${3:-capture}"
+    frontend_repo="${4:-}"
+
+    if [ -z "$project" ]; then
+      echo "Usage: $0 speckit:visual <project-slug> <capture|compare|update|all> [frontend-repo]"
+      exit 1
+    fi
+
+    design_dir="/workspace/design-context/$project"
+    visual_dir="$design_dir/visual-regression"
+
+    case "$action" in
+      capture)
+        docker compose run --rm --use-aliases \
+          -w "$visual_dir" \
+          playwright-runner \
+          bash -lc "npm install && npm run capture"
+        ;;
+
+      compare)
+        if [ -z "$frontend_repo" ]; then
+          echo "Usage: $0 speckit:visual <project-slug> compare <frontend-repo>"
+          exit 1
+        fi
+
+        docker compose run --rm --use-aliases \
+          -w "$visual_dir" \
+          -e DESIGN_CONTEXT="$design_dir" \
+          -e FRONTEND_REPO="/workspace/frontend/$frontend_repo" \
+          playwright-runner \
+          bash -lc "npm install && npm run compare"
+        ;;
+
+      update)
+        docker compose run --rm --use-aliases \
+          -w "$visual_dir" \
+          playwright-runner \
+          bash -lc "npm install && npm run update"
+        ;;
+
+      all)
+        if [ -z "$frontend_repo" ]; then
+          echo "Usage: $0 speckit:visual <project-slug> all <frontend-repo>"
+          exit 1
+        fi
+
+        docker compose run --rm --use-aliases \
+          -w "$visual_dir" \
+          -e DESIGN_CONTEXT="$design_dir" \
+          -e FRONTEND_REPO="/workspace/frontend/$frontend_repo" \
+          playwright-runner \
+          bash -lc "npm install && npm run capture && npm run compare"
+        ;;
+
+      *)
+        echo "Unknown speckit visual action: $action"
+        echo "Usage: $0 speckit:visual <project-slug> <capture|compare|update|all> [frontend-repo]"
+        exit 1
+        ;;
+    esac
+    ;;
+
   *)
-    echo "Usage: $0 {backend:test|backend:run|backend:start|backend:stop|frontend:install|frontend:test|frontend:build|frontend:start|frontend:stop|frontend:e2e|infrastructure:validate|infrastructure:apply|backend:version|infrastructure:version|infrastructure:plan|stack:logs|stack:logs:database|stack:logs:filestore|stack:logs:metrics|stack:logs:mailer|stack:reset} [subdir]"
+    echo "Usage: $0 {backend:test|backend:run|backend:start|backend:stop|frontend:install|frontend:test|frontend:build|frontend:start|frontend:stop|frontend:e2e|infrastructure:validate|infrastructure:apply|backend:version|infrastructure:version|infrastructure:plan|database:psql|stack:logs|stack:logs:database|stack:logs:filestore|stack:logs:metrics|stack:logs:mailer|stack:reset} [subdir|query]"
     exit 1
     ;;
 esac
