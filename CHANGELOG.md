@@ -1,3 +1,9 @@
+## [1.15.0](https://github.com/reytech-dev/opencode-environment/compare/v1.14.0...v1.15.0) (2026-06-25)
+
+### Features
+
+* **crawler:** add design crawler ([de03fbc](https://github.com/reytech-dev/opencode-environment/commit/de03fbc79ed3d950ea0e2597265b6066a2884611))
+
 ## [1.14.0](https://github.com/reytech-dev/opencode-environment/compare/v1.13.0...v1.14.0) (2026-06-25)
 
 ### Features
