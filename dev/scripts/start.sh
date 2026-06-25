@@ -374,7 +374,7 @@ validate_compose_config() {
 
 start_stack() {
     set +e
-    "${COMPOSE_CMD[@]}" up -d postgres minio prometheus open-design mailpit
+    "${COMPOSE_CMD[@]}" up -d postgres minio prometheus mailpit
     local ec=$?
     set -e
     if [[ $ec -eq 0 ]]; then
@@ -396,7 +396,6 @@ check_readiness() {
         "postgres"
         "minio"
         "prometheus"
-        "open-design"
     )
 
     local failed=false

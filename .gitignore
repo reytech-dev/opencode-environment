@@ -1,6 +1,4 @@
 .env
-workspace/open-design
-!workspace/open-design/.gitkeep
 node_modules
 dist
 __pycache__/
