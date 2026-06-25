@@ -1,3 +1,14 @@
+## [1.14.0](https://github.com/reytech-dev/opencode-environment/compare/v1.13.0...v1.14.0) (2026-06-25)
+
+### Features
+
+* **setup:** add nginx to serve static prototype for playwright ([4bcd2f0](https://github.com/reytech-dev/opencode-environment/commit/4bcd2f0a0f781c95e058fd5f54dcabf1d476d899))
+
+### Chores
+
+* **cleanup:** remove open-design from stack ([bcd0dfe](https://github.com/reytech-dev/opencode-environment/commit/bcd0dfec933a2a78087c75e44baaae6ee955ba3a))
+* **speckit:** update open-design-extension version ([b1d4eb4](https://github.com/reytech-dev/opencode-environment/commit/b1d4eb44988c359f49a29c65839af33a48882112))
+
 ## [1.13.0](https://github.com/reytech-dev/opencode-environment/compare/v1.12.0...v1.13.0) (2026-06-24)
 
 ### Features
