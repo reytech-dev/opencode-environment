@@ -68,23 +68,6 @@ services:
       CI: "true"
     command: tail -f /dev/null
 
-  open-design:
-    image: ghcr.io/reytech-dev/opencode-stack/opencode-stack:${OPEN_DESIGN_VERSION:-latest}
-    environment:
-      OD_API_TOKEN: ${OPEN_DESIGN_API_TOKEN:?Please run 'openssl rand -hex 32' to generate one, and set it in your .env file.}
-      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-""}
-      OD_CHAT_RUN_INACTIVITY_TIMEOUT_MS: ${OPEN_DESIGN_CHAT_RUN_INACTIVITY_TIMEOUT_MS:-600000}
-    volumes:
-      - ./workspace/open-design:/home/ubuntu/import:delegated
-      # local volumes
-      - open_design_opencode_data:/home/ubuntu/.local/share/opencode
-      - open_design_data:/app/.od
-    ports:
-    - "${OPEN_DESIGN_PORT:-7456}:7456"
-    # Required because of OD_API_TOKEN validation. The validation checks if the request comes from loopback interface, and in docker compose, the request comes from the internal docker network, which causes the validation to fail. 
-    # By using host network mode, the request comes from the loopback interface, and the validation passes.
-    network_mode: host
-
   postgres:
     image: postgres:${POSTGRESQL_VERSION:-18}
     environment:
@@ -141,15 +124,20 @@ services:
     volumes:
       - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
 
+  design-preview:
+    image: nginx:${NGINX_VERSION:-latest}
+    volumes:
+      - ${HOST_PROJECT_DIR}/workspace/design-context:/usr/share/nginx/html/design-context:ro
+      - ./docker/nginx/design-preview.conf.template:/etc/nginx/templates/default.conf.template:ro
+    ports:
+      - "${DESIGN_PREVIEW_PORT:-7460}:80"
+
 volumes:
   # postgresql
   postgres_data:
   # opencode
   bashhistory:
   opencode_data:
-  # open-design
-  open_design_data:
-  open_design_opencode_data:
   # mailpit
   mailpit_data:
   # minio

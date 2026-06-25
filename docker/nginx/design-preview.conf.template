@@ -1,0 +1,40 @@
+server {
+    listen 80;
+    server_name _;
+
+    root /usr/share/nginx/html;
+
+    sendfile off;
+    etag off;
+    if_modified_since off;
+    add_header Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0" always;
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    location ~* \.(js|mjs)$ {
+        types {
+            application/javascript js mjs;
+        }
+        try_files $uri =404;
+    }
+
+    location ~* \.(css)$ {
+        types {
+            text/css css;
+        }
+        try_files $uri =404;
+    }
+
+    location ~* \.(svg)$ {
+        types {
+            image/svg+xml svg;
+        }
+        try_files $uri =404;
+    }
+
+    location ~* \.(png|jpg|jpeg|webp|gif|ico|woff|woff2|ttf|otf)$ {
+        try_files $uri =404;
+    }
+}
