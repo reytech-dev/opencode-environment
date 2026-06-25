@@ -18,8 +18,8 @@ Commands:
   start     Start the Docker Compose workbench
   enter     Enter the running opencode runtime
   help      Show this help message
-  speckit:visual <project-slug> <capture|compare|update|all> [frontend-repo]
-            Run speckit Open Design visual capture and regression checks
+  speckit:visual <project-slug> <discover|capture|all> [extra-args]
+            Discover prototype screens and capture visual artifacts
 
 Examples:
   ./bin/oe setup

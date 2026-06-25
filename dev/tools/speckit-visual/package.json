@@ -1,0 +1,13 @@
+{
+  "name": "opencode-environment-speckit-visual",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "discover": "node prototype-map-crawler.mjs discover",
+    "capture": "node prototype-map-crawler.mjs capture",
+    "all": "node prototype-map-crawler.mjs all"
+  },
+  "dependencies": {
+    "playwright": "1.61.0"
+  }
+}

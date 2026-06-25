@@ -172,66 +172,32 @@ case "${1:-}" in
 
   speckit:visual)
     project="${2:-}"
-    action="${3:-capture}"
-    frontend_repo="${4:-}"
-
     if [ -z "$project" ]; then
-      echo "Usage: $0 speckit:visual <project-slug> <capture|compare|update|all> [frontend-repo]"
+      echo "Usage: $0 speckit:visual <project-slug> <discover|capture|all> [extra-args]" >&2
       exit 1
     fi
+    shift 2
 
-    design_dir="/workspace/design-context/$project"
-    visual_dir="$design_dir/visual-regression"
+    canonical_url="http://design-preview:80/design-context/$project/index.html"
+    output_root="/workspace/design-context/$project"
+    host_design_dir="/workspace/workspace/design-context/$project"
 
-    case "$action" in
-      capture)
-        docker compose run --rm --use-aliases \
-          -w "$visual_dir" \
-          playwright-runner \
-          bash -lc "npm install && npm run capture"
-        ;;
+    mkdir -p "$host_design_dir/visual-regression/fixtures" \
+             "$host_design_dir/visual-regression/screenshots" \
+             "$host_design_dir/design-processing"
+    chmod -R 777 "$host_design_dir/visual-regression" "$host_design_dir/design-processing" 2>/dev/null || true
 
-      compare)
-        if [ -z "$frontend_repo" ]; then
-          echo "Usage: $0 speckit:visual <project-slug> compare <frontend-repo>"
-          exit 1
-        fi
+    docker compose up -d design-preview
 
-        docker compose run --rm --use-aliases \
-          -w "$visual_dir" \
-          -e DESIGN_CONTEXT="$design_dir" \
-          -e FRONTEND_REPO="/workspace/frontend/$frontend_repo" \
-          playwright-runner \
-          bash -lc "npm install && npm run compare"
-        ;;
-
-      update)
-        docker compose run --rm --use-aliases \
-          -w "$visual_dir" \
-          playwright-runner \
-          bash -lc "npm install && npm run update"
-        ;;
-
-      all)
-        if [ -z "$frontend_repo" ]; then
-          echo "Usage: $0 speckit:visual <project-slug> all <frontend-repo>"
-          exit 1
-        fi
-
-        docker compose run --rm --use-aliases \
-          -w "$visual_dir" \
-          -e DESIGN_CONTEXT="$design_dir" \
-          -e FRONTEND_REPO="/workspace/frontend/$frontend_repo" \
-          playwright-runner \
-          bash -lc "npm install && npm run capture && npm run compare"
-        ;;
-
-      *)
-        echo "Unknown speckit visual action: $action"
-        echo "Usage: $0 speckit:visual <project-slug> <capture|compare|update|all> [frontend-repo]"
-        exit 1
-        ;;
-    esac
+    docker compose run --rm --use-aliases \
+      -e SPECKIT_PROJECT="$project" \
+      -e DESIGN_PREVIEW_URL="$canonical_url" \
+      -e SPECKIT_VISUAL_OUTPUT_ROOT="$output_root" \
+      playwright-runner \
+      bash -lc "cp -r /tools/speckit-visual /tmp/crawler && cd /tmp/crawler && npm install && node prototype-map-crawler.mjs $* \
+        --project '$project' \
+        --canonical-url '$canonical_url' \
+        --output-root '$output_root'"
     ;;
 
   *)
