@@ -1,3 +1,9 @@
+## [1.16.0](https://github.com/reytech-dev/opencode-environment/compare/v1.15.0...v1.16.0) (2026-06-26)
+
+### Features
+
+* **tools:** add frontend staging and static graphQL fixture materializer ([924552e](https://github.com/reytech-dev/opencode-environment/commit/924552eedbeb583608a011a7c4bdd17f72b5043f))
+
 ## [1.15.0](https://github.com/reytech-dev/opencode-environment/compare/v1.14.0...v1.15.0) (2026-06-25)
 
 ### Features
