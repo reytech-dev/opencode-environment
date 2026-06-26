@@ -123,10 +123,11 @@ Use the `workspace/` directory as the staging area for application repositories:
 
 ```text
 workspace/
-  backend/          Java backend repositories go here later
-  frontend/         Node.js / frontend repositories go here later
-  infrastructure/   OpenTofu / infrastructure repositories go here later
-  design-context/   Open Design processing artifacts before application repositories exist
+  backend/             Java backend repositories go here later
+  frontend/            Node.js / frontend repositories go here later
+  frontend-staging/    Temporary frontend staging apps from design-context artifacts
+  infrastructure/      OpenTofu / infrastructure repositories go here later
+  design-context/      Open Design processing artifacts before application repositories exist
 ```
 
 These folders are intentionally empty in the blueprint.
@@ -180,6 +181,45 @@ This keeps tooling versions reproducible and ensures commands run inside the app
 ./bin/oe cleanup    # Remove bootstrap artifacts
 ./bin/oe help       # Show help message
 ```
+
+## Frontend Staging from Open Design
+
+The frontend repository does not need to exist during early design implementation.
+
+Flow:
+
+1. Generate visual artifacts:
+   ```bash
+   ./bin/oe speckit:visual <project-slug> all
+   ```
+
+2. Process design artifacts:
+   ```text
+   /speckit.open-design.process --project <project-slug>
+   ```
+
+3. Create temporary frontend staging app:
+   ```bash
+   ./bin/oe speckit:frontend-stage <project-slug> create
+   ```
+
+4. Start frontend staging app:
+   ```bash
+   ./bin/oe speckit:frontend-stage <project-slug> install
+   ./bin/oe speckit:frontend-stage <project-slug> start
+   ```
+
+5. Implement UI against static GraphQL fixtures.
+
+6. Compare against the design screenshots:
+   ```bash
+   ./bin/oe speckit:visual <project-slug> compare --frontend-url http://node-runner:5173
+   ```
+
+7. Copy to final frontend repo later:
+   ```bash
+   ./bin/oe speckit:frontend-stage <project-slug> copy-to <frontend-repo>
+   ```
 
 ## Working with future repositories
 

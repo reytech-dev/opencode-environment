@@ -75,23 +75,38 @@ case "${1:-}" in
     ;;
 
   frontend:install)
-    run_cmd node-runner "${2:-}" pnpm install
+    subdir="${2:-}"
+    if [ -n "$subdir" ]; then
+      docker compose run --rm -w "/workspace/frontend/$subdir" node-runner pnpm install
+    else
+      docker compose run --rm -w "/workspace/frontend" node-runner pnpm install
+    fi
     ;;
 
   frontend:test)
-    run_cmd node-runner "${2:-}" pnpm test
+    subdir="${2:-}"
+    if [ -n "$subdir" ]; then
+      docker compose run --rm -w "/workspace/frontend/$subdir" node-runner pnpm test
+    else
+      docker compose run --rm -w "/workspace/frontend" node-runner pnpm test
+    fi
     ;;
 
   frontend:build)
-    run_cmd node-runner "${2:-}" pnpm build
+    subdir="${2:-}"
+    if [ -n "$subdir" ]; then
+      docker compose run --rm -w "/workspace/frontend/$subdir" node-runner pnpm build
+    else
+      docker compose run --rm -w "/workspace/frontend" node-runner pnpm build
+    fi
     ;;
 
   frontend:start)
     subdir="${2:-}"
     if [ -n "$subdir" ]; then
-        nohup docker compose run --rm --service-ports --use-aliases -w "/workspace/$subdir" node-runner pnpm dev > /tmp/frontend.log 2>&1 &
+        nohup docker compose run --rm --service-ports --use-aliases -w "/workspace/frontend/$subdir" node-runner pnpm dev > /tmp/frontend.log 2>&1 &
     else
-        nohup docker compose run --rm --service-ports --use-aliases node-runner pnpm dev > /tmp/frontend.log 2>&1 &
+        nohup docker compose run --rm --service-ports --use-aliases -w "/workspace/frontend" node-runner pnpm dev > /tmp/frontend.log 2>&1 &
     fi
     PID=$!
     disown $PID
@@ -200,8 +215,98 @@ case "${1:-}" in
         --output-root '$output_root'"
     ;;
 
+  speckit:frontend-stage)
+    project="${2:-}"
+    action="${3:-create}"
+
+    if [ -z "$project" ]; then
+      echo "Usage: $0 speckit:frontend-stage <project-slug> <create|install|start|build|test|copy-to|clean> [args]" >&2
+      exit 1
+    fi
+
+    shift 3
+
+    design_root="/workspace/design-context/$project"
+    stage_root="/workspace/frontend-staging/$project"
+
+    case "$action" in
+      create)
+        docker compose run --rm --use-aliases \
+          -w /tools/speckit-frontend-stage \
+          node-runner \
+          bash -lc "npm install && node materialize-frontend-stage.mjs \
+            --project '$project' \
+            --design-root '$design_root' \
+            --stage-root '$stage_root' \
+            $*"
+        ;;
+
+      install)
+        docker compose run --rm --use-aliases \
+          -w "$stage_root" \
+          node-runner \
+          pnpm install
+        ;;
+
+      start)
+        docker compose run --rm --service-ports --use-aliases \
+          -w "$stage_root" \
+          node-runner \
+          pnpm dev --host 0.0.0.0
+        ;;
+
+      build)
+        docker compose run --rm --use-aliases \
+          -w "$stage_root" \
+          node-runner \
+          pnpm build
+        ;;
+
+      test)
+        docker compose run --rm --use-aliases \
+          -w "$stage_root" \
+          node-runner \
+          pnpm test
+        ;;
+
+      clean)
+        rm -rf "workspace/frontend-staging/$project"
+        echo "Cleaned workspace/frontend-staging/$project"
+        ;;
+
+      copy-to)
+        frontend_repo="${1:-}"
+        if [ -z "$frontend_repo" ]; then
+          echo "Usage: $0 speckit:frontend-stage <project-slug> copy-to <frontend-repo>" >&2
+          exit 1
+        fi
+
+        src="workspace/frontend-staging/$project"
+        dest="workspace/frontend/$frontend_repo"
+
+        if [ ! -d "$src" ]; then
+          echo "Frontend staging directory not found: $src" >&2
+          exit 1
+        fi
+
+        mkdir -p "$dest"
+        if command -v rsync >/dev/null 2>&1; then
+          rsync -a --exclude node_modules --exclude dist --exclude .git "$src"/ "$dest"/
+        else
+          cp -R "$src"/* "$dest"/ 2>/dev/null || true
+        fi
+        echo "Copied frontend staging project to $dest"
+        ;;
+
+      *)
+        echo "Unknown speckit:frontend-stage action: $action" >&2
+        exit 1
+        ;;
+    esac
+    ;;
+
   *)
-    echo "Usage: $0 {backend:test|backend:run|backend:start|backend:stop|frontend:install|frontend:test|frontend:build|frontend:start|frontend:stop|frontend:e2e|infrastructure:validate|infrastructure:apply|backend:version|infrastructure:version|infrastructure:plan|database:psql|stack:logs|stack:logs:database|stack:logs:filestore|stack:logs:metrics|stack:logs:mailer|stack:reset} [subdir|query]"
+    echo "Usage: $0 {backend:test|backend:run|backend:start|backend:stop|frontend:install|frontend:test|frontend:build|frontend:start|frontend:stop|frontend:e2e|infrastructure:validate|infrastructure:apply|backend:version|infrastructure:version|infrastructure:plan|database:psql|stack:logs|stack:logs:database|stack:logs:filestore|stack:logs:metrics|stack:logs:mailer|stack:reset|speckit:visual|speckit:frontend-stage} [subdir|query]"
     exit 1
     ;;
 esac

@@ -20,6 +20,8 @@ Commands:
   help      Show this help message
   speckit:visual <project-slug> <discover|capture|all> [extra-args]
             Discover prototype screens and capture visual artifacts
+  speckit:frontend-stage <project-slug> <create|install|start|build|test|copy-to|clean> [args]
+            Create and operate a temporary frontend staging app from design-context artifacts
 
 Examples:
   ./bin/oe setup
@@ -58,6 +60,9 @@ main() {
             ;;
         speckit:visual)
             shift; exec "$REPO_ROOT/dev/scripts/wrapper.sh" speckit:visual "$@"
+            ;;
+        speckit:frontend-stage)
+            shift; exec "$REPO_ROOT/dev/scripts/wrapper.sh" speckit:frontend-stage "$@"
             ;;
         help|--help|-h)
             print_help

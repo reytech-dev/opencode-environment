@@ -1,0 +1,9 @@
+{
+  "name": "opencode-environment-speckit-frontend-stage",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "create": "node materialize-frontend-stage.mjs"
+  },
+  "dependencies": {}
+}

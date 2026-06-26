@@ -143,7 +143,9 @@ main() {
       fi
       [ -n "${SUBDIR}" ] && shift
       shift
-      compose_run "${FRONTEND_SERVICE}" "${SUBDIR}" "$@"
+      local fe_subdir="frontend"
+      [ -n "${SUBDIR}" ] && fe_subdir="frontend/${SUBDIR}"
+      compose_run "${FRONTEND_SERVICE}" "${fe_subdir}" "$@"
       ;;
 
     playwright:exec)
@@ -164,7 +166,9 @@ main() {
 
     frontend:shell)
       subdir="${1:-}"
-      compose_shell "${FRONTEND_SERVICE}" "${subdir}"
+      local fe_subdir="frontend"
+      [ -n "$subdir" ] && fe_subdir="frontend/$subdir"
+      compose_shell "${FRONTEND_SERVICE}" "${fe_subdir}"
       ;;
 
     playwright:shell)

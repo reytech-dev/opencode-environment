@@ -43,7 +43,8 @@ services:
       context: ./dev/runners/node
     working_dir: /workspace
     volumes:
-      - ${HOST_PROJECT_DIR}/workspace/frontend:/workspace:delegated
+      - ${HOST_PROJECT_DIR}/workspace:/workspace:delegated
+      - ${HOST_PROJECT_DIR}/dev/tools/speckit-frontend-stage:/tools/speckit-frontend-stage:ro
       # local volumes
       - pnpm_store:/home/node/.local/share/pnpm/store
 

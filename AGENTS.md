@@ -11,6 +11,7 @@
 | `workspace/backend/` | Clone Java backend repositories here | Gradle wrapper required (`./gradlew`) — no global Gradle installed |
 | `workspace/frontend/` | Clone Node.js/JavaScript frontend repositories here | pnpm 11.5.2 pre-installed |
 | `workspace/infrastructure/` | Clone OpenTofu IaC repositories here | OpenTofu CLI pre-installed |
+| `workspace/frontend-staging/` | Temporary frontend staging implementations generated from design-context artifacts | Node runner has full workspace access |
 | `workspace/design-context/` | Open Design processing artifacts (canonical screenshots, design IR, visual regression) | Playwright runner has full workspace access |
 
 These directories are mounted into their respective Docker runner containers at `/workspace`. Any changes made inside a runner container are reflected directly on the host filesystem.
