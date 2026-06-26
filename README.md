@@ -82,7 +82,6 @@ The environment includes services such as:
 * MinIO
 * Mailpit
 * Prometheus
-* Open Design
 * opencode
 * backend runner
 * frontend runner
@@ -275,7 +274,6 @@ Typical configuration includes:
 
 * PostgreSQL settings
 * MinIO settings
-* Open Design settings
 * opencode provider keys
 * Context7 API key
 * GitHub username and token
@@ -293,7 +291,6 @@ Default service ports:
 | MinIO Console |         9001 | Object storage UI            |
 | Mailpit       |         8025 | Email capture and testing    |
 | Prometheus    |         9090 | Metrics                      |
-| Open Design   |         7456 | Design and review workflow   |
 
 Ports can be changed in `.env`.
 
