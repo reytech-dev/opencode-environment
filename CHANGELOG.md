@@ -1,3 +1,13 @@
+## [1.17.0](https://github.com/reytech-dev/opencode-environment/compare/v1.16.0...v1.17.0) (2026-06-28)
+
+### Features
+
+* **materialize-frontend-stage:** use frontend blueprint project in materialize-frontend-stage ([7a310f4](https://github.com/reytech-dev/opencode-environment/commit/7a310f46374f9318031dc6daec234dc77825be86))
+
+### Chores
+
+* **cleanup:** remove open design mentions ([0455885](https://github.com/reytech-dev/opencode-environment/commit/0455885fc6441f0488d038fb577b142d4f42ea1a))
+
 ## [1.16.0](https://github.com/reytech-dev/opencode-environment/compare/v1.15.0...v1.16.0) (2026-06-26)
 
 ### Features
