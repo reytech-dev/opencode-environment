@@ -1,3 +1,9 @@
+## [1.17.3](https://github.com/reytech-dev/opencode-environment/compare/v1.17.2...v1.17.3) (2026-06-28)
+
+### Bug Fixes
+
+* **wrapper:** fix path for frontend processing ([571696c](https://github.com/reytech-dev/opencode-environment/commit/571696c8e78f7f62a74315bbcfe38a63ac95e1cc))
+
 ## [1.17.2](https://github.com/reytech-dev/opencode-environment/compare/v1.17.1...v1.17.2) (2026-06-28)
 
 ### Bug Fixes
