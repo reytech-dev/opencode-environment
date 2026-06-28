@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+
 run_cmd() {
     local runner="$1"
     local subdir="${2:-}"
@@ -195,7 +198,7 @@ case "${1:-}" in
 
     canonical_url="http://design-preview:80/design-context/$project/index.html"
     output_root="/workspace/design-context/$project"
-    host_design_dir="/workspace/workspace/design-context/$project"
+    host_design_dir="$REPO_ROOT/workspace/design-context/$project"
 
     mkdir -p "$host_design_dir/visual-regression/fixtures" \
              "$host_design_dir/visual-regression/screenshots" \
@@ -275,7 +278,7 @@ case "${1:-}" in
         ;;
 
       clean)
-        rm -rf "workspace/frontend-staging/$project"
+        rm -rf "$REPO_ROOT/workspace/frontend-staging/$project"
         echo "Cleaned workspace/frontend-staging/$project"
         ;;
 
@@ -286,8 +289,8 @@ case "${1:-}" in
           exit 1
         fi
 
-        src="workspace/frontend-staging/$project"
-        dest="workspace/frontend/$frontend_repo"
+        src="$REPO_ROOT/workspace/frontend-staging/$project"
+        dest="$REPO_ROOT/workspace/frontend/$frontend_repo"
 
         if [ ! -d "$src" ]; then
           echo "Frontend staging directory not found: $src" >&2
