@@ -1,3 +1,13 @@
+## [1.17.4](https://github.com/reytech-dev/opencode-environment/compare/v1.17.3...v1.17.4) (2026-06-28)
+
+### Bug Fixes
+
+* **.gitignore:** add linebreak at the end ([7de19f7](https://github.com/reytech-dev/opencode-environment/commit/7de19f70e5499cf963fab2efe5a287c77ad24e1c))
+
+### Chores
+
+* **extension:** update extension version for spec-kit-open-design ([03a53dc](https://github.com/reytech-dev/opencode-environment/commit/03a53dc3e2c6a7632d55be49ef859349a7a73ecc))
+
 ## [1.17.3](https://github.com/reytech-dev/opencode-environment/compare/v1.17.2...v1.17.3) (2026-06-28)
 
 ### Bug Fixes
