@@ -5,5 +5,7 @@
   "scripts": {
     "create": "node materialize-frontend-stage.mjs"
   },
-  "dependencies": {}
+  "dependencies": {
+    "js-yaml": "^4.1.0"
+  }
 }

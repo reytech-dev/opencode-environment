@@ -231,6 +231,10 @@ case "${1:-}" in
 
     case "$action" in
       create)
+        catalog_arg=""
+        if ! echo "$*" | grep -q -- '--blueprint-catalog'; then
+          catalog_arg="--blueprint-catalog /opencode-catalog/.opencode/blueprints.yaml"
+        fi
         docker compose run --rm --use-aliases \
           -w /tools/speckit-frontend-stage \
           node-runner \
@@ -238,6 +242,7 @@ case "${1:-}" in
             --project '$project' \
             --design-root '$design_root' \
             --stage-root '$stage_root' \
+            $catalog_arg \
             $*"
         ;;
 

@@ -185,6 +185,8 @@ This keeps tooling versions reproducible and ensures commands run inside the app
 
 The frontend repository does not need to exist during early design implementation.
 
+The staging app is materialized from the configured frontend blueprint (default: `frontend/ui-apollo`) and overlaid with design-derived artifacts. The staging app is blueprint-compatible with the eventual final frontend repository.
+
 Flow:
 
 1. Generate visual artifacts:
@@ -197,7 +199,7 @@ Flow:
    /speckit.open-design.process --project <project-slug>
    ```
 
-3. Create temporary frontend staging app:
+3. Create temporary frontend staging app from blueprint:
    ```bash
    ./bin/oe speckit:frontend-stage <project-slug> create
    ```
@@ -219,6 +221,8 @@ Flow:
    ```bash
    ./bin/oe speckit:frontend-stage <project-slug> copy-to <frontend-repo>
    ```
+
+The staging app uses the same blueprint package, tooling, Apollo, Vite, TypeScript, lint, test, and codegen configuration as the final frontend repository. Generated files are overlays atop the blueprint — core project-shell files come from the blueprint, not from a synthetic generator.
 
 ## Working with future repositories
 
