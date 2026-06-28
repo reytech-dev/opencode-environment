@@ -4,6 +4,11 @@
 
 `opencode-environment` is a **development environment blueprint** by Reytech. It provides a Docker Compose-based setup that orchestrates 10 containerized services for full-stack development. The `workspace/` directory is a staging area where external application repositories are checked out for agents to work on.
 
+> **Also see:**
+> - [`README.md`](./README.md) — quickstart guide, command reference, workflows, and configuration details.
+> - [`dev/tools/speckit-visual/README.md`](./dev/tools/speckit-visual/README.md) — visual crawler and screenshot comparison tool.
+> - [`dev/tools/speckit-frontend-stage/README.md`](./dev/tools/speckit-frontend-stage/README.md) — blueprint-based frontend staging materializer.
+
 ## Workspace Layout
 
 | Directory | Purpose | Tooling |

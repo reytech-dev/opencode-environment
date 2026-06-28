@@ -191,7 +191,7 @@ case "${1:-}" in
   speckit:visual)
     project="${2:-}"
     if [ -z "$project" ]; then
-      echo "Usage: $0 speckit:visual <project-slug> <discover|capture|all> [extra-args]" >&2
+      echo "Usage: $0 speckit:visual <project-slug> <discover|capture|compare|all> [extra-args]" >&2
       exit 1
     fi
     shift 2
@@ -202,6 +202,7 @@ case "${1:-}" in
 
     mkdir -p "$host_design_dir/visual-regression/fixtures" \
              "$host_design_dir/visual-regression/screenshots" \
+             "$host_design_dir/visual-regression/test-results" \
              "$host_design_dir/design-processing"
     chmod -R 777 "$host_design_dir/visual-regression" "$host_design_dir/design-processing" 2>/dev/null || true
 

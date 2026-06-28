@@ -8,6 +8,8 @@
     "all": "node prototype-map-crawler.mjs all"
   },
   "dependencies": {
-    "playwright": "1.61.0"
+    "playwright": "1.61.0",
+    "pngjs": "^7.0.0",
+    "pixelmatch": "^7.1.0"
   }
 }

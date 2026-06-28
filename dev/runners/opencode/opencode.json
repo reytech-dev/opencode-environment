@@ -30,7 +30,8 @@
       "./gradlew *": "deny",
       "gradlew *": "deny",
       "tofu *": "deny",
-      "java *": "deny"
+      "java *": "deny",
+      "docker *": "deny"
     }
   },
   "autoupdate": false

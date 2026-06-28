@@ -1,4 +1,6 @@
 import { chromium } from "playwright";
+import { PNG } from "pngjs";
+import pixelmatch from "pixelmatch";
 import { createHash } from "crypto";
 import { writeFileSync, mkdirSync, readFileSync, existsSync, statSync, unlinkSync } from "fs";
 import { join, dirname, relative, resolve } from "path";
@@ -40,6 +42,8 @@ Commands:
              write prototype-map.json and source-map.json.
   capture    Read source-map.json, replay action paths, capture
              screenshots, extract DOM, write design-ir.json.
+  compare    Read route-map.json, open frontend routes, compare
+             screenshots against captured design references.
   all        Run discover then capture.
 
 Required options:
@@ -67,11 +71,32 @@ Optional options:
                               PM screens win over deep duplicates.  Default: false
   --help                      Print this usage.
 
+Compare options:
+  --frontend-url <url>        Frontend base URL to compare.
+                              Default: FRONTEND_URL env, then
+                              http://node-runner:5173
+  --route-map <path>          Explicit route-map path.
+                              Default: <output-root>/
+                              visual-regression/fixtures/route-map.json
+  --test-results-dir <path>   Results output directory.
+                              Default: <output-root>/
+                              visual-regression/test-results
+  --fail-on-diff              Exit non-zero when comparison fails.
+                              Default: true for compare.
+  --no-fail-on-diff           Always exit 0 even when visual diffs found.
+  --update-actual             Capture actuals and write report, exit 0.
+  --compare-timeout-ms <num>  Timeout per frontend route.
+                              Default: --timeout-ms or 30000
+  --settle-ms <num>           Extra wait after network/font ready.
+                              Default: 500
+  --skip-frontend-healthcheck Skip frontend base URL reachability check.
+
 Environment variable fallbacks:
   SPECKIT_PROJECT          Fallback for --project
   DESIGN_PREVIEW_URL       Fallback for --canonical-url
   SPECKIT_VISUAL_OUTPUT_ROOT  Fallback for --output-root
   SPECKIT_PROTOTYPE_MAP_TEXT  Fallback for --prototype-map-text
+  FRONTEND_URL             Fallback for --frontend-url
 `);
 }
 
@@ -94,6 +119,15 @@ function parseArgs(argv) {
     else if (a === "--dedup") args.flags.dedup = true;
     else if (a === "--full-page") args.flags.fullPage = true;
     else if (a === "--headful") args.flags.headful = true;
+    else if (a === "--fail-on-diff") args.flags.failOnDiff = true;
+    else if (a === "--no-fail-on-diff") args.flags.noFailOnDiff = true;
+    else if (a === "--update-actual") args.flags.updateActual = true;
+    else if (a === "--skip-frontend-healthcheck") args.flags.skipFrontendHealthcheck = true;
+    else if (a === "--frontend-url") args.frontendUrl = argv[++i];
+    else if (a === "--route-map") args.routeMap = argv[++i];
+    else if (a === "--test-results-dir") args.testResultsDir = argv[++i];
+    else if (a === "--compare-timeout-ms") args.compareTimeoutMs = parseInt(argv[++i], 10);
+    else if (a === "--settle-ms") args.settleMs = parseInt(argv[++i], 10);
     else if (a === "--help" || a === "-h") args.flags.help = true;
     else if (!a.startsWith("--")) args._.push(a);
     else { console.error("Unknown option:", a); process.exit(1); }
@@ -117,8 +151,8 @@ function resolveConfig(parsed) {
   }
 
   const command = parsed._[0];
-  if (!command || !["discover", "capture", "all"].includes(command)) {
-    console.error("Error: command required (discover | capture | all)");
+  if (!command || !["discover", "capture", "compare", "all"].includes(command)) {
+    console.error("Error: command required (discover | capture | compare | all)");
     printUsage();
     process.exit(1);
   }
@@ -155,7 +189,20 @@ function resolveConfig(parsed) {
   const deepMaxScreens = parsed.deepMaxScreens ?? 50;
   const dedup = parsed.flags.dedup ?? false;
 
-  return { command, project, canonicalUrl, outputRoot, prototypeMapText, viewports, viewportFilter, maxEntries, fullPage, headless, timeoutMs, deep, deepMaxDepth, deepMaxScreens, dedup };
+  const frontendUrl =
+    parsed.frontendUrl ||
+    process.env.FRONTEND_URL ||
+    "http://node-runner:5173";
+
+  const routeMapPath = parsed.routeMap || null;
+  const testResultsDir = parsed.testResultsDir || null;
+  const failOnDiff = parsed.flags.noFailOnDiff ? false : (parsed.flags.failOnDiff ?? (command === "compare"));
+  const updateActual = parsed.flags.updateActual ?? false;
+  const compareTimeoutMs = parsed.compareTimeoutMs ?? timeoutMs;
+  const settleMs = parsed.settleMs ?? 500;
+  const skipFrontendHealthcheck = parsed.flags.skipFrontendHealthcheck ?? false;
+
+  return { command, project, canonicalUrl, outputRoot, prototypeMapText, viewports, viewportFilter, maxEntries, fullPage, headless, timeoutMs, deep, deepMaxDepth, deepMaxScreens, dedup, frontendUrl, routeMapPath, testResultsDir, failOnDiff, updateActual, compareTimeoutMs, settleMs, skipFrontendHealthcheck };
 }
 
 function ensureDir(p) {
@@ -1419,6 +1466,351 @@ function appendDeepToSourceMap(outputRoot, deepScreens, viewports) {
   console.log(`  appended ${deepScreens.length} deep screens to source-map.json (total: ${doc.screens.length})`);
 }
 
+function joinUrl(baseUrl, route) {
+  const base = baseUrl.replace(/\/+$/, "");
+  const path = route.startsWith("/") ? route : `/${route}`;
+  return `${base}${path}`;
+}
+
+function normalizeRouteMap(raw) {
+  if (!raw) return [];
+  if (Array.isArray(raw)) return raw;
+  if (raw.entries && typeof raw.entries === "object" && !Array.isArray(raw.entries)) {
+    return Object.entries(raw.entries).map(([id, entry]) => ({ ...entry, id: entry.id || id }));
+  }
+  if (Array.isArray(raw.entries)) return raw.entries;
+  return [];
+}
+
+function resolveReferenceScreenshot(routeMapDir, refPath) {
+  if (!refPath) return null;
+  if (refPath.startsWith("/")) return refPath;
+  return resolve(routeMapDir, refPath);
+}
+
+function compareScreenshots(actualBuf, refBuf, entry) {
+  const actualPng = PNG.sync.read(actualBuf);
+  const refPng = PNG.sync.read(refBuf);
+
+  if (actualPng.width !== refPng.width || actualPng.height !== refPng.height) {
+    return {
+      passed: false, diffPixels: actualPng.width * actualPng.height,
+      diffPixelRatio: 1, reason: "dimension_mismatch",
+      actualWidth: actualPng.width, actualHeight: actualPng.height,
+      refWidth: refPng.width, refHeight: refPng.height,
+    };
+  }
+
+  const { width, height } = actualPng;
+  const diff = new PNG({ width, height });
+  const threshold = entry.threshold ?? 0.2;
+  const diffPixels = pixelmatch(actualPng.data, refPng.data, diff.data, width, height, { threshold });
+  const totalPixels = width * height;
+  const diffPixelRatio = totalPixels > 0 ? diffPixels / totalPixels : 0;
+  const maxDiffPixels = entry.maxDiffPixels ?? 200;
+  const maxDiffPixelRatio = entry.maxDiffPixelRatio ?? 0.001;
+  const passed = diffPixels <= maxDiffPixels && diffPixelRatio <= maxDiffPixelRatio;
+
+  return {
+    passed, diffPixels, diffPixelRatio, maxDiffPixels, maxDiffPixelRatio, threshold,
+    diffBuf: PNG.sync.write(diff),
+  };
+}
+
+function writeComparisonReportJson(resultsDir, report) {
+  const jsonPath = join(resultsDir, "comparison-report.json");
+  writeFileSync(jsonPath, JSON.stringify(report, null, 2) + "\n");
+  console.log(`  wrote ${jsonPath}`);
+  return jsonPath;
+}
+
+function writeComparisonReportMd(resultsDir, report) {
+  const mdPath = join(resultsDir, "comparison-report.md");
+  const lines = [];
+  lines.push("# Visual Comparison Report");
+  lines.push("");
+  lines.push(`Project: \`${report.project.slug}\``);
+  lines.push("");
+  lines.push(`Frontend URL: \`${report.frontend.url}\``);
+  lines.push("");
+  lines.push("## Summary");
+  lines.push("");
+  const s = report.summary;
+  lines.push("| Total | Passed | Failed | Skipped |");
+  lines.push("|---:|---:|---:|---:|");
+  lines.push(`| ${s.total} | ${s.passed} | ${s.failed} | ${s.skipped} |`);
+  lines.push("");
+  lines.push("## Results");
+  lines.push("");
+  lines.push("| Entry | Screen | Viewport | Route | Status | Diff Pixels | Diff Ratio |");
+  lines.push("|---|---|---|---|---|---:|---:|");
+
+  for (const r of report.results) {
+    const status = r.status === "passed" ? "passed" : r.status === "failed" ? "failed" : "skipped";
+    const diffPx = r.diffPixels != null ? String(r.diffPixels) : "—";
+    const diffRatio = r.diffPixelRatio != null ? r.diffPixelRatio.toFixed(6) : "—";
+    lines.push(`| ${r.id} | ${r.screenName} | ${r.viewport.name} | ${r.implementationRoute || "—"} | ${status} | ${diffPx} | ${diffRatio} |`);
+  }
+
+  lines.push("");
+  lines.push("---");
+  lines.push("");
+  lines.push("**Actual screenshots:** `actual/`");
+  lines.push("");
+  lines.push("**Diff screenshots:** `diff/`");
+  lines.push("");
+
+  writeFileSync(mdPath, lines.join("\n") + "\n");
+  console.log(`  wrote ${mdPath}`);
+  return mdPath;
+}
+
+async function runCompare(config) {
+  console.log(`\n=== COMPARE: ${config.project} ===`);
+  console.log(`  frontend URL: ${config.frontendUrl}`);
+  console.log(`  output root: ${config.outputRoot}`);
+
+  const routeMapPath = config.routeMapPath ||
+    join(config.outputRoot, "visual-regression", "fixtures", "route-map.json");
+
+  if (!existsSync(routeMapPath)) {
+    console.error(`  ERROR: route-map.json not found at ${routeMapPath}`);
+    console.error("  Run 'discover' and 'capture' first, then ensure route-map.json exists.");
+    process.exit(1);
+  }
+
+  const routeMapRaw = JSON.parse(readFileSync(routeMapPath, "utf-8"));
+  const entries = normalizeRouteMap(routeMapRaw);
+
+  if (entries.length === 0) {
+    console.error("  ERROR: no entries found in route-map.json");
+    process.exit(1);
+  }
+
+  const entriesWithRoutes = entries.filter((e) => e.implementationRoute);
+  if (entriesWithRoutes.length === 0) {
+    console.error("\nNo implementationRoute values found in route-map.json.");
+    console.error("");
+    console.error("Edit:");
+    console.error(`workspace/design-context/${config.project}/visual-regression/fixtures/route-map.json`);
+    console.error("");
+    console.error("Set implementationRoute for each screen, for example:");
+    console.error("");
+    console.error('"implementationRoute": "/001-dashboard"');
+    console.error("");
+    console.error("Then rerun:");
+    console.error(`./bin/oe speckit:visual ${config.project} compare --frontend-url ${config.frontendUrl}`);
+    process.exit(1);
+  }
+
+  const routeMapDir = dirname(resolve(routeMapPath));
+  const resultsDir = config.testResultsDir ||
+    join(config.outputRoot, "visual-regression", "test-results");
+
+  ensureDir(resultsDir);
+  ensureDir(join(resultsDir, "actual"));
+  ensureDir(join(resultsDir, "diff"));
+
+  const firstEntry = entriesWithRoutes[0];
+  const firstVp = firstEntry.viewport || DEFAULT_VIEWPORTS[0];
+  const vp = { width: firstVp.width, height: firstVp.height, deviceScaleFactor: firstVp.deviceScaleFactor || 1 };
+  const timeoutMs = config.compareTimeoutMs;
+
+  const { browser, page } = await createBrowserAndPage(vp, { ...config, timeoutMs });
+
+  const warnings = [];
+  const results = [];
+
+  try {
+    if (!config.skipFrontendHealthcheck) {
+      console.log(`  checking frontend: ${config.frontendUrl}`);
+      try {
+        await page.goto(config.frontendUrl, { waitUntil: "domcontentloaded", timeout: timeoutMs });
+        console.log("  frontend reachable");
+      } catch (err) {
+        console.error(`\nFrontend URL is not reachable: ${config.frontendUrl}`);
+        console.error("");
+        console.error("Start the frontend staging app first:");
+        console.error("");
+        console.error(`./bin/oe speckit:frontend-stage ${config.project} start`);
+        console.error("");
+        console.error("Then rerun:");
+        console.error(`./bin/oe speckit:visual ${config.project} compare --frontend-url ${config.frontendUrl}`);
+        await browser.close();
+        process.exit(1);
+      }
+    }
+
+    for (const entry of entries) {
+      const id = entry.id || `${entry.screenId}__${(entry.viewport || {}).name || "unknown"}`;
+      const screenId = entry.screenId || id;
+      const screenName = entry.screenName || screenId;
+      const route = entry.implementationRoute;
+      const evp = entry.viewport || { name: "desktop", width: 1440, height: 1024, deviceScaleFactor: 1 };
+
+      if (!route) {
+        console.log(`  - ${id} skipped (no implementationRoute)`);
+        results.push({
+          id, screenId, screenName, viewport: evp, implementationRoute: null,
+          url: null, referenceScreenshot: entry.referenceScreenshot || null,
+          actualScreenshot: null, diffScreenshot: null,
+          status: "skipped", warnings: ["Missing implementationRoute"],
+        });
+        continue;
+      }
+
+      if (!entry.referenceScreenshot) {
+        console.log(`  - ${id} skipped (no referenceScreenshot)`);
+        results.push({
+          id, screenId, screenName, viewport: evp, implementationRoute: route,
+          url: joinUrl(config.frontendUrl, route), referenceScreenshot: null,
+          actualScreenshot: null, diffScreenshot: null,
+          status: "skipped", warnings: ["Missing referenceScreenshot"],
+        });
+        continue;
+      }
+
+      if (!evp.width || !evp.height) {
+        console.log(`  - ${id} skipped (invalid viewport)`);
+        results.push({
+          id, screenId, screenName, viewport: evp, implementationRoute: route,
+          url: joinUrl(config.frontendUrl, route),
+          referenceScreenshot: entry.referenceScreenshot,
+          actualScreenshot: null, diffScreenshot: null,
+          status: "skipped", warnings: ["Invalid viewport dimensions"],
+        });
+        continue;
+      }
+
+      const refPath = resolveReferenceScreenshot(routeMapDir, entry.referenceScreenshot);
+      if (!existsSync(refPath)) {
+        warnings.push(`Missing reference screenshot for ${id}: ${refPath}`);
+        console.log(`  - ${id} skipped (reference screenshot missing)`);
+        results.push({
+          id, screenId, screenName, viewport: evp, implementationRoute: route,
+          url: joinUrl(config.frontendUrl, route), referenceScreenshot: entry.referenceScreenshot,
+          actualScreenshot: null, diffScreenshot: null,
+          status: "skipped", warnings: [`Reference screenshot not found: ${refPath}`],
+        });
+        continue;
+      }
+
+      const pageUrl = joinUrl(config.frontendUrl, route);
+      console.log(`  [${id}] ${screenName} → ${pageUrl}`);
+
+      try {
+        await page.setViewportSize({ width: evp.width, height: evp.height }).catch(() => {});
+        const resp = await page.goto(pageUrl, { waitUntil: "domcontentloaded", timeout: timeoutMs });
+
+        await page.waitForLoadState("networkidle", { timeout: timeoutMs }).catch(() => {});
+
+        try { await page.evaluate(() => document.fonts.ready); } catch (_) {}
+
+        await page.addStyleTag({ content: DETERMINISTIC_CSS });
+        await page.waitForTimeout(config.settleMs);
+
+        const actualBuf = await page.screenshot({
+          animations: "disabled",
+          caret: "hide",
+          scale: "css",
+        });
+
+        const refBuf = readFileSync(refPath);
+
+        const actualOut = join(resultsDir, "actual", `${id}.png`);
+        writeFileSync(actualOut, actualBuf);
+
+        const cmp = compareScreenshots(actualBuf, refBuf, entry);
+
+        let diffOut = null;
+        if (cmp.diffBuf) {
+          diffOut = join(resultsDir, "diff", `${id}.png`);
+          writeFileSync(diffOut, cmp.diffBuf);
+        }
+
+        const status = cmp.passed ? "passed" : "failed";
+
+        if (status === "passed") {
+          console.log(`    \x1b[32m✓ passed\x1b[0m diff=${cmp.diffPixels} ratio=${cmp.diffPixelRatio.toFixed(6)}`);
+        } else {
+          const reason = cmp.reason || `diff=${cmp.diffPixels} ratio=${cmp.diffPixelRatio.toFixed(6)}`;
+          console.log(`    \x1b[31m✗ failed\x1b[0m ${reason}`);
+          if (cmp.actualWidth && cmp.refWidth) {
+            console.log(`      actual: ${cmp.actualWidth}x${cmp.actualHeight}  ref: ${cmp.refWidth}x${cmp.refHeight}`);
+          }
+        }
+
+        const entryWarnings = [];
+        if (resp && !resp.ok()) {
+          entryWarnings.push(`HTTP status ${resp.status()} for ${pageUrl}`);
+        }
+
+        results.push({
+          id, screenId, screenName,
+          viewport: { name: evp.name, width: evp.width, height: evp.height, deviceScaleFactor: evp.deviceScaleFactor || 1 },
+          implementationRoute: route,
+          url: pageUrl,
+          referenceScreenshot: entry.referenceScreenshot,
+          actualScreenshot: `actual/${id}.png`,
+          diffScreenshot: cmp.diffBuf ? `diff/${id}.png` : null,
+          status,
+          diffPixels: cmp.diffPixels,
+          diffPixelRatio: cmp.diffPixelRatio,
+          maxDiffPixels: cmp.maxDiffPixels,
+          maxDiffPixelRatio: cmp.maxDiffPixelRatio,
+          threshold: cmp.threshold,
+          warnings: entryWarnings,
+        });
+      } catch (err) {
+        const msg = err.message || String(err);
+        console.log(`    \x1b[33m! error\x1b[0m ${msg}`);
+        warnings.push(`entry ${id}: ${msg}`);
+        results.push({
+          id, screenId, screenName,
+          viewport: { name: evp.name, width: evp.width, height: evp.height, deviceScaleFactor: evp.deviceScaleFactor || 1 },
+          implementationRoute: route,
+          url: pageUrl,
+          referenceScreenshot: entry.referenceScreenshot || null,
+          actualScreenshot: null, diffScreenshot: null,
+          status: "failed",
+          warnings: [msg],
+        });
+      }
+    }
+  } finally {
+    await browser.close();
+  }
+
+  const total = results.length;
+  const passed = results.filter((r) => r.status === "passed").length;
+  const failed = results.filter((r) => r.status === "failed").length;
+  const skipped = results.filter((r) => r.status === "skipped").length;
+
+  const report = {
+    version: 1,
+    generated_at: isoNow(),
+    project: { slug: config.project },
+    frontend: { url: config.frontendUrl },
+    route_map: relative(dirname(resultsDir), routeMapPath),
+    summary: { total, passed, failed, skipped },
+    results,
+    warnings,
+  };
+
+  const jsonPath = writeComparisonReportJson(resultsDir, report);
+  const mdPath = writeComparisonReportMd(resultsDir, report);
+
+  console.log(`\n  Summary: ${passed} passed, ${failed} failed, ${skipped} skipped (${total} total)`);
+  console.log(`\n  Report:`);
+  console.log(`  ${mdPath}`);
+
+  const exitCode = (config.failOnDiff && !config.updateActual && failed > 0) ? 1 : 0;
+  if (exitCode !== 0) {
+    console.log(`\n${failed} visual comparison${failed === 1 ? " has" : "s have"} failed.`);
+    process.exit(exitCode);
+  }
+}
+
 async function main() {
   const rawArgs = parseArgs(process.argv.slice(2));
   const config = resolveConfig(rawArgs);
@@ -1427,6 +1819,8 @@ async function main() {
     await runDiscover(config);
   } else if (config.command === "capture") {
     await runCapture(config);
+  } else if (config.command === "compare") {
+    await runCompare(config);
   } else if (config.command === "all") {
     await runDiscover(config);
     await runCapture(config);

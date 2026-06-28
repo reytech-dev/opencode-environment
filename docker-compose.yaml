@@ -45,7 +45,7 @@ services:
     volumes:
       - ${HOST_PROJECT_DIR}/workspace:/workspace:delegated
       - ${HOST_PROJECT_DIR}/.opencode:/opencode-catalog/.opencode:ro
-      - ${HOST_PROJECT_DIR}/dev/tools/speckit-frontend-stage:/tools/speckit-frontend-stage:ro
+      - ${HOST_PROJECT_DIR}/dev/tools/speckit-frontend-stage:/tools/speckit-frontend-stage
       # local volumes
       - pnpm_store:/home/node/.local/share/pnpm/store
 

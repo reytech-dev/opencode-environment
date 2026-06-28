@@ -369,3 +369,28 @@ The workbench starts first.
 Product repositories come later.
 
 Agents then use the workbench to inspect, create, modify, test, and operate those repositories in a reproducible local environment.
+
+## Comand workflow
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/reytech-dev/opencode-environment/main/install.sh | bash -s -- Workbench --version latest
+cd Workbench
+./bin/oe start
+export PROJECT=workbench
+mkdir -p "workspace/design-context/$PROJECT"
+# Copy Open Design / Claude Design export to:
+# workspace/design-context/$PROJECT/index.html
+./bin/oe speckit:visual "$PROJECT" all
+./bin/oe enter -- opencode
+/speckit.open-design.process --project workbench
+./bin/oe speckit:frontend-stage "$PROJECT" clean
+./bin/oe speckit:frontend-stage "$PROJECT" create \
+  --patch-blueprint-app \
+  --patch-apollo-client
+./bin/oe speckit:frontend-stage "$PROJECT" install
+./bin/oe speckit:frontend-stage "$PROJECT" build
+./bin/oe speckit:frontend-stage "$PROJECT" test
+./bin/oe speckit:frontend-stage "$PROJECT" start
+./bin/oe enter -- opencode
+Implement the static pixel-perfect frontend UI in workspace/frontend-staging/workbench using workspace/design-context/workbench. Use static GraphQL fixtures only. Match the screenshots.
+```
