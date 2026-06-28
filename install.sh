@@ -215,7 +215,7 @@ run_setup() {
 
     if [[ -x "$dir/bin/oe" ]]; then
         log "Running setup..."
-        (cd "$dir" && COMPOSE_PROJECT_NAME="$project_name" ./bin/oe setup) || warn "./bin/oe setup exited with code $?"
+        (cd "$dir" && COMPOSE_PROJECT_NAME="${project_name,,}" ./bin/oe setup) || warn "./bin/oe setup exited with code $?"
         log "Running doctor..."
         (cd "$dir" && ./bin/oe doctor) || warn "./bin/oe doctor exited with code $?"
     else
@@ -227,7 +227,7 @@ run_setup() {
         fi
 
         if [[ -f "$dir/.env" ]]; then
-            sed -i "s|^COMPOSE_PROJECT_NAME=.*|COMPOSE_PROJECT_NAME=\"${project_name}\"|" "$dir/.env"
+            sed -i "s|^COMPOSE_PROJECT_NAME=.*|COMPOSE_PROJECT_NAME=\"${project_name,,}\"|" "$dir/.env"
             log "Set COMPOSE_PROJECT_NAME to ${project_name}"
         fi
 
@@ -278,7 +278,7 @@ main() {
     resolve_latest_version
     validate_version
     clone_repository
-    run_setup "${TARGET_DIR,,}"
+    run_setup "$TARGET_DIR"
     print_next_steps
 }
 
