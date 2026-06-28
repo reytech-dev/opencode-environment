@@ -1,3 +1,9 @@
+## [1.18.0](https://github.com/reytech-dev/opencode-environment/compare/v1.17.4...v1.18.0) (2026-06-28)
+
+### Features
+
+* **wrapper:** add speckit:visual compare command ([3371af4](https://github.com/reytech-dev/opencode-environment/commit/3371af4d40b46f6f7556f5d6c2a8acabd3362f10))
+
 ## [1.17.4](https://github.com/reytech-dev/opencode-environment/compare/v1.17.3...v1.17.4) (2026-06-28)
 
 ### Bug Fixes
