@@ -160,17 +160,6 @@ check_configuration() {
         report_ok "HOST_PROJECT_DIR is set correctly"
     fi
 
-    # OPEN_DESIGN_API_TOKEN
-    local token
-    token=$(read_env_value OPEN_DESIGN_API_TOKEN || true)
-    if [[ -z "$token" ]]; then
-        report_fail "OPEN_DESIGN_API_TOKEN is missing or empty"
-    elif is_shell_expression "$token"; then
-        report_fail "OPEN_DESIGN_API_TOKEN contains an unresolved shell expression — run ./bin/oe setup"
-    else
-        report_ok "OPEN_DESIGN_API_TOKEN is configured"
-    fi
-
     # COMPOSE_PROJECT_NAME
     local project_name
     project_name=$(read_env_value COMPOSE_PROJECT_NAME || true)
@@ -257,7 +246,6 @@ check_ports() {
         "MINIO_PORT|9000|MinIO API"
         "MINIO_CONSOLE_PORT|9001|MinIO Console"
         "PROMETHEUS_PORT|9090|Prometheus"
-        "OPEN_DESIGN_PORT|7456|Open Design"
     )
 
     for entry in "${entries[@]}"; do

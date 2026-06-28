@@ -405,7 +405,6 @@ grep -rn '}}>' workspace/frontend/$PROJECT/src/
 | MinIO (S3-compatible) | `9000` (API), `9001` (console) | Console port configurable via `MINIO_CONSOLE_PORT`; healthcheck enabled |
 | Mailpit (SMTP capture) | `1025` (SMTP), `8025` (web UI, configurable via `MAILPIT_HTTP_PORT`) | Catches all outbound email; web UI available |
 | Prometheus | `9090` (configurable via `PROMETHEUS_PORT`) | Scrapes backend `/actuator/prometheus` |
-| Open Design | `7456` (configurable via `OPEN_DESIGN_PORT`) | Design/review tool; uses host network mode |
 
 ## Pre-Implementation Checklist
 

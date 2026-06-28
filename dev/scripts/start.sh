@@ -257,18 +257,6 @@ preflight() {
         else
             log_success "HOST_PROJECT_DIR is set correctly"
         fi
-
-        local token
-        token=$(read_env_value OPEN_DESIGN_API_TOKEN || true)
-        if [[ -z "$token" ]]; then
-            log_error "OPEN_DESIGN_API_TOKEN is missing or empty"
-            failed=true
-        elif is_shell_expression "$token"; then
-            log_error "OPEN_DESIGN_API_TOKEN contains an unresolved shell expression — run ./bin/oe setup"
-            failed=true
-        else
-            log_success "OPEN_DESIGN_API_TOKEN is configured"
-        fi
     fi
 
     # Docker
@@ -326,7 +314,6 @@ check_ports() {
         "MINIO_PORT|9000|MinIO API"
         "MINIO_CONSOLE_PORT|9001|MinIO Console"
         "PROMETHEUS_PORT|9090|Prometheus"
-        "OPEN_DESIGN_PORT|7456|Open Design"
     )
 
     local failed=false
@@ -418,11 +405,6 @@ check_readiness() {
 print_urls() {
     echo
     echo "Useful URLs:"
-
-    local open_design_port
-    open_design_port=$(read_env_value OPEN_DESIGN_PORT || true)
-    open_design_port="${open_design_port:-7456}"
-    log_info "Open Design:    http://localhost:${open_design_port}"
 
     local minio_console_port
     minio_console_port=$(read_env_value MINIO_CONSOLE_PORT || true)

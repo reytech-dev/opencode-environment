@@ -152,28 +152,6 @@ setup_host_project_dir() {
     log_success "Set HOST_PROJECT_DIR to $REPO_ROOT"
 }
 
-setup_open_design_token() {
-    local env_file="$REPO_ROOT/.env"
-    local current
-    current=$(read_env_value OPEN_DESIGN_API_TOKEN "$env_file")
-
-    # Already has a concrete non-empty non-expression value → skip
-    if [[ -n "$current" ]] && ! is_shell_expression "$current"; then
-        log_success "OPEN_DESIGN_API_TOKEN is already configured"
-        return
-    fi
-
-    local token
-    token=$(generate_token)
-    set_env_value OPEN_DESIGN_API_TOKEN "$token" "$env_file"
-
-    if is_shell_expression "${current:-}"; then
-        log_success "Replaced shell expression in OPEN_DESIGN_API_TOKEN"
-    else
-        log_success "Generated OPEN_DESIGN_API_TOKEN"
-    fi
-}
-
 setup_state_file() {
     local state_dir="$REPO_ROOT/.opencodenv"
     local state_file="$state_dir/state"
@@ -245,7 +223,6 @@ main() {
     setup_workspace_dirs
     setup_host_project_dir
     setup_compose_project_name
-    setup_open_design_token
     prompt_optional_credentials
     setup_state_file
 

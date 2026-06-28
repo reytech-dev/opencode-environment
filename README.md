@@ -62,7 +62,7 @@ It should check:
 * Docker is installed and reachable
 * Docker Compose is available
 * required ports are free
-* `.env` exists and required variables (HOST_PROJECT_DIR, OPEN_DESIGN_API_TOKEN, COMPOSE_PROJECT_NAME) are configured
+* `.env` exists and required variables (HOST_PROJECT_DIR, COMPOSE_PROJECT_NAME) are configured
 * workspace folders exist
 * runner scripts are executable
 
