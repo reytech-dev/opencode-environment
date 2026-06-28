@@ -1,3 +1,9 @@
+## [1.17.1](https://github.com/reytech-dev/opencode-environment/compare/v1.17.0...v1.17.1) (2026-06-28)
+
+### Bug Fixes
+
+* **install:** fix wordir name in install script ([0b3b58f](https://github.com/reytech-dev/opencode-environment/commit/0b3b58fcc67f45a63ed4d565c947b5e09e201a88))
+
 ## [1.17.0](https://github.com/reytech-dev/opencode-environment/compare/v1.16.0...v1.17.0) (2026-06-28)
 
 ### Features
