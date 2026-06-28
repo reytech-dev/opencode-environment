@@ -1,3 +1,9 @@
+## [1.17.2](https://github.com/reytech-dev/opencode-environment/compare/v1.17.1...v1.17.2) (2026-06-28)
+
+### Bug Fixes
+
+* **open-design:** remove open-design dependencies and artifacts ([f1c32f4](https://github.com/reytech-dev/opencode-environment/commit/f1c32f45b85e9001d47660a5cc04e619650b853f))
+
 ## [1.17.1](https://github.com/reytech-dev/opencode-environment/compare/v1.17.0...v1.17.1) (2026-06-28)
 
 ### Bug Fixes
