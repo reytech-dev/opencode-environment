@@ -1,3 +1,9 @@
+## [1.19.0](https://github.com/reytech-dev/opencode-environment/compare/v1.18.0...v1.19.0) (2026-06-29)
+
+### Features
+
+* **specify:** add new extension spec-kit-design-frontend ([b9af576](https://github.com/reytech-dev/opencode-environment/commit/b9af576ce1df085a290aa5643c02192dc7b4ad27))
+
 ## [1.18.0](https://github.com/reytech-dev/opencode-environment/compare/v1.17.4...v1.18.0) (2026-06-28)
 
 ### Features
