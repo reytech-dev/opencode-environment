@@ -1,3 +1,9 @@
+## [1.20.0](https://github.com/reytech-dev/opencode-environment/compare/v1.19.0...v1.20.0) (2026-07-01)
+
+### Features
+
+* **command:** add promote command to copy prepared frontend repo ([a912be4](https://github.com/reytech-dev/opencode-environment/commit/a912be46377b40866d6acd94f2b3d0f61140fa66))
+
 ## [1.19.0](https://github.com/reytech-dev/opencode-environment/compare/v1.18.0...v1.19.0) (2026-06-29)
 
 ### Features
