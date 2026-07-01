@@ -20,7 +20,7 @@ Commands:
   help      Show this help message
   speckit:visual <project-slug> <discover|capture|compare|all> [extra-args]
             Discover prototype screens, capture visual artifacts, or compare frontend implementation
-  speckit:frontend-stage <project-slug> <create|install|start|build|test|copy-to|clean> [args]
+  speckit:frontend-stage <project-slug> <create|install|start|build|test|copy-to|promote|clean> [args]
             Create and operate a temporary frontend staging app from design-context artifacts
 
 Examples:

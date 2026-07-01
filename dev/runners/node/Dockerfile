@@ -4,7 +4,7 @@ ARG PNPM_VERSION=11.5.2
 
 USER root
 
-RUN apt-get update && apt-get install -y --no-install-recommends git ca-certificates && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends git ca-certificates rsync && rm -rf /var/lib/apt/lists/*
 
 RUN corepack disable || true \
   && rm -f /usr/local/bin/pnpm /usr/local/bin/pnpx \

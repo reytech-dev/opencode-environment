@@ -44,6 +44,7 @@ function resolveOptions() {
       "patch-apollo-client":  { type: "boolean", default: false },
       force:                  { type: "boolean", default: false },
       "force-fixtures":       { type: "boolean", default: false },
+      "promote-repo":         { type: "string" },
       help:                   { type: "boolean", default: false },
     },
     allowPositionals: false,
@@ -91,6 +92,7 @@ function resolveOptions() {
     patchApolloClient: values["patch-apollo-client"],
     force: values.force,
     forceFixtures: values["force-fixtures"] || values.force,
+    promoteRepo: values["promote-repo"] || null,
   };
 }
 
@@ -628,6 +630,123 @@ function applyBlueprintOverlays(opts) {
   };
 }
 
+function runPromoteMode(opts) {
+  const { project, stageRoot, promoteRepo, force } = opts;
+
+  const metaPath = join(stageRoot, ".speckit/frontend-stage.json");
+  const meta = readJson(metaPath);
+  if (!meta) {
+    console.error("Not a valid frontend staging app (missing .speckit/frontend-stage.json)");
+    process.exit(1);
+  }
+
+  const bp = meta.blueprint || {};
+  const blueprintKey = bp.id || "frontend/ui-apollo";
+  const repository = bp.repository || null;
+  const repositoryUrl = bp.repositoryUrl || null;
+  const ref = bp.ref || null;
+  const refType = bp.refType || "tag";
+
+  const dest = `/workspace/frontend/${promoteRepo}`;
+  const provPath = join(dest, ".blueprint-provenance.yml");
+
+  let copied = false;
+  if (existsSync(dest)) {
+    if (existsSync(provPath)) {
+      console.log(`  Target exists — skipping copy (provenance present): ${dest}`);
+    } else if (!force) {
+      console.error("Target exists with unmanaged files. Use --force to overwrite.");
+      process.exit(1);
+    } else {
+      ensureDir(dest);
+      execSync(`rsync -a --exclude node_modules --exclude dist --exclude .git "${stageRoot}"/ "${dest}"/`, { stdio: "pipe" });
+      copied = true;
+    }
+  } else {
+    ensureDir(dest);
+    execSync(`rsync -a --exclude node_modules --exclude dist --exclude .git "${stageRoot}"/ "${dest}"/`, { stdio: "pipe" });
+    copied = true;
+  }
+  if (copied) {
+    console.log(`  Copied staging to ${dest}`);
+  }
+
+  const provenance = {
+    schema_version: "1.0",
+    blueprint: {
+      repository,
+      repository_url: repositoryUrl,
+      ref,
+      ref_type: refType,
+      blueprint_key: blueprintKey,
+    },
+    materialized: {
+      at: new Date().toISOString(),
+      by: "speckit.frontend-stage.promote",
+      mode: "promote",
+    },
+    project: {
+      id: promoteRepo,
+      area: "frontend",
+      path: `workspace/frontend/${promoteRepo}`,
+      command_project_template: "{project}-ui",
+    },
+    parameters: {
+      project: project,
+      source: "speckit-frontend-stage",
+    },
+  };
+  writeFileSync(provPath, yaml.dump(provenance));
+  console.log(`  wrote ${provPath}`);
+
+  const workspaceYmlPath = "/workspace/.opencode/workspace.yml";
+  const projectEntry = {
+    id: promoteRepo,
+    area: "frontend",
+    path: `workspace/frontend/${promoteRepo}`,
+    blueprint: blueprintKey,
+    repository_source: repository,
+    repository_url: repositoryUrl,
+    ref,
+    ref_type: refType,
+    runner: "node-runner",
+    validation: [
+      `./dev/scripts/wrapper.sh frontend:install ${promoteRepo}`,
+      `./dev/scripts/wrapper.sh frontend:test ${promoteRepo}`,
+      `./dev/scripts/wrapper.sh frontend:build ${promoteRepo}`,
+    ],
+    status: "materialized",
+  };
+
+  if (!existsSync(workspaceYmlPath)) {
+    const doc = {
+      schema_version: "1.0",
+      workspace: {
+        root: "workspace",
+        status: "partial",
+      },
+      projects: [projectEntry],
+    };
+    ensureDir(dirname(workspaceYmlPath));
+    writeFileSync(workspaceYmlPath, yaml.dump(doc));
+    console.log(`  wrote ${workspaceYmlPath}`);
+  } else {
+    const doc = yaml.load(readText(workspaceYmlPath)) || {};
+    if (!Array.isArray(doc.projects)) doc.projects = [];
+    const exists = doc.projects.some(p => p && p.id === promoteRepo);
+    if (exists) {
+      console.log("Already registered in workspace.yml");
+    } else {
+      doc.projects.push(projectEntry);
+      writeFileSync(workspaceYmlPath, yaml.dump(doc));
+      console.log(`  updated ${workspaceYmlPath}`);
+    }
+  }
+
+  console.log(`\nPromoted frontend staging to workspace/frontend/${promoteRepo}`);
+  console.log(`Registered in .opencode/workspace.yml`);
+}
+
 function runFallbackMode(opts) {
   const { project, designRoot, stageRoot, force, forceFixtures } = opts;
 
@@ -1111,6 +1230,11 @@ function runBlueprintMode(opts) {
 
 function main() {
   const opts = resolveOptions();
+
+  if (opts.promoteRepo) {
+    runPromoteMode(opts);
+    return;
+  }
 
   if (opts.isFallback) {
     runFallbackMode(opts);

@@ -224,7 +224,7 @@ case "${1:-}" in
     action="${3:-create}"
 
     if [ -z "$project" ]; then
-      echo "Usage: $0 speckit:frontend-stage <project-slug> <create|install|start|build|test|copy-to|clean> [args]" >&2
+      echo "Usage: $0 speckit:frontend-stage <project-slug> <create|install|start|build|test|copy-to|promote|clean> [args]" >&2
       exit 1
     fi
 
@@ -305,6 +305,22 @@ case "${1:-}" in
           cp -R "$src"/* "$dest"/ 2>/dev/null || true
         fi
         echo "Copied frontend staging project to $dest"
+        ;;
+
+      promote)
+        frontend_repo="${1:-}"
+        if [ -z "$frontend_repo" ]; then
+          echo "Usage: $0 speckit:frontend-stage <project-slug> promote <frontend-repo>" >&2
+          exit 1
+        fi
+        docker compose run --rm --use-aliases \
+          -w /tools/speckit-frontend-stage \
+          node-runner \
+          bash -lc "npm install && node materialize-frontend-stage.mjs \
+            --project '$project' \
+            --design-root '$design_root' \
+            --stage-root '$stage_root' \
+            --promote-repo '$frontend_repo'"
         ;;
 
       *)
