@@ -68,7 +68,7 @@ blueprints:
       description: "React frontend application using Apollo Client, Vite, TypeScript, Vitest, Playwright, and pnpm."
       repository: "reytech-dev/ui-apollo-blueprint"
       repository_url: "https://github.com/reytech-dev/ui-apollo-blueprint"
-      default_ref: "v1.2.0"
+      default_ref: "v1.3.0"
       ref_type: "tag"
       area: "frontend"
 
