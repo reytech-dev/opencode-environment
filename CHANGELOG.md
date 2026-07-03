@@ -1,3 +1,9 @@
+## [1.21.0](https://github.com/reytech-dev/opencode-environment/compare/v1.20.0...v1.21.0) (2026-07-03)
+
+### Features
+
+* **blueprints:** update ui-blueprint to 1.3.0 ([d7720c1](https://github.com/reytech-dev/opencode-environment/commit/d7720c1d02c7dfa13f7b5de71991dfb46e20ce93))
+
 ## [1.20.0](https://github.com/reytech-dev/opencode-environment/compare/v1.19.0...v1.20.0) (2026-07-01)
 
 ### Features
