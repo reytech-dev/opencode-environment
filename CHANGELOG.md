@@ -1,3 +1,9 @@
+## [1.21.1](https://github.com/reytech-dev/opencode-environment/compare/v1.21.0...v1.21.1) (2026-07-05)
+
+### Bug Fixes
+
+* **mount:** streamline workspace mount in opencode container ([c0d2ad4](https://github.com/reytech-dev/opencode-environment/commit/c0d2ad40521f67883d6382130d58a7788e275ce9))
+
 ## [1.21.0](https://github.com/reytech-dev/opencode-environment/compare/v1.20.0...v1.21.0) (2026-07-03)
 
 ### Features
