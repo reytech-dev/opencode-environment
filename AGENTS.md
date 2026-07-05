@@ -93,7 +93,7 @@ Use `./bin/oe` from the project root to control the workbench lifecycle:
 
 **Never run raw `docker compose` commands directly.**
 
-Both scripts are executed from the **project root** (`/workspace` inside the opencode container, or the repository root on the host).
+Both scripts are executed from the **project root** (`/project` inside the opencode container, or the repository root on the host).
 
 ## Environment Management
 

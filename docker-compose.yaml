@@ -9,8 +9,8 @@ services:
       DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-""}
       DOCKER_HOST: unix:///var/run/docker.sock
     volumes:
-      - ./dev/scripts:/scripts:delegated
-      - .:/workspace:delegated
+      - .:/project:delegated
+      - ./workspace:/workspace:delegated
       - ./dev/runners/opencode/opencode.json:/home/node/.config/opencode/opencode.json
       # required for opencode to be able to spin up sibling containers for code execution and other tasks
       - /var/run/docker.sock:/var/run/docker.sock

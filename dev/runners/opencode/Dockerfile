@@ -50,7 +50,7 @@ RUN mkdir -p "${HOME}/.npm-global" "${HOME}/.npm-cache" && \
 RUN mkdir -p "${OPENCODE_STORAGE}" "${OPENCODE_CONFIG_DIR}" && \
   chown -R "${NON_ROOT_USERNAME}:${NON_ROOT_USERNAME}" "${HOME}"
 
-WORKDIR /workspace
+WORKDIR /project
 
 # Install uv
 COPY --from=ghcr.io/astral-sh/uv:0.11.22 /uv /uvx /bin/

@@ -72,12 +72,12 @@ print_welcome() {
     log_success "Entering opencode environment."
     echo
     log_info "Repository root is mounted at:"
-    log_info "  /workspace"
+    log_info "  /project"
     echo
     log_info "Application repositories will later live in:"
-    log_info "  /workspace/workspace/backend"
-    log_info "  /workspace/workspace/frontend"
-    log_info "  /workspace/workspace/infrastructure"
+    log_info "  /workspace/backend"
+    log_info "  /workspace/frontend"
+    log_info "  /workspace/infrastructure"
     echo
     log_info "Reminder:"
     log_info "  Use the project runner scripts for backend, frontend, infrastructure, and E2E tooling."
