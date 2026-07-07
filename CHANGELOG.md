@@ -1,3 +1,9 @@
+## [1.21.2](https://github.com/reytech-dev/opencode-environment/compare/v1.21.1...v1.21.2) (2026-07-07)
+
+### Bug Fixes
+
+* **speckit:** update spec-kit-open-design extension to 1.4.0 ([6f48a19](https://github.com/reytech-dev/opencode-environment/commit/6f48a1906f94c71ac7bd697037149b92caedc6f1))
+
 ## [1.21.1](https://github.com/reytech-dev/opencode-environment/compare/v1.21.0...v1.21.1) (2026-07-05)
 
 ### Bug Fixes
