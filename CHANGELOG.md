@@ -1,3 +1,9 @@
+## [1.22.0](https://github.com/reytech-dev/opencode-environment/compare/v1.21.2...v1.22.0) (2026-07-08)
+
+### Features
+
+* **ui-apollo-blueprint:** update ui-apollo-blueprint to 1.4.0 ([08cdf33](https://github.com/reytech-dev/opencode-environment/commit/08cdf3342080489b52a244afab0b6311b07374f4))
+
 ## [1.21.2](https://github.com/reytech-dev/opencode-environment/compare/v1.21.1...v1.21.2) (2026-07-07)
 
 ### Bug Fixes
