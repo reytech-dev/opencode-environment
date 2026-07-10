@@ -133,7 +133,7 @@ Each wrapper command accepts an optional second argument — a subdirectory with
 | `./dev/scripts/wrapper.sh backend:test` | Run `./gradlew test` |
 | `./dev/scripts/wrapper.sh backend:run` | Run `./gradlew bootRun` with service ports exposed |
 | `./dev/scripts/wrapper.sh backend:start` | Start backend in background (ensures PostgreSQL is healthy first). PID → `/tmp/backend.pid`, logs → `/tmp/backend.log` |
-| `./dev/scripts/wrapper.sh backend:stop` | Stop the background backend process |
+| `./dev/scripts/wrapper.sh backend:stop [project-name]` | Stop the background backend process. Optional `project-name` overrides the runner container prefix (defaults to `COMPOSE_PROJECT_NAME` from `.env`) |
 
 #### Frontend (Node.js)
 
@@ -144,7 +144,7 @@ Each wrapper command accepts an optional second argument — a subdirectory with
 | `./dev/scripts/wrapper.sh frontend:test` | Run `pnpm test` |
 | `./dev/scripts/wrapper.sh frontend:build` | Run `pnpm build` |
 | `./dev/scripts/wrapper.sh frontend:start` | Start frontend dev server in background (`pnpm dev`). PID → `/tmp/frontend.pid`, logs → `/tmp/frontend.log` |
-| `./dev/scripts/wrapper.sh frontend:stop` | Stop the background frontend process |
+| `./dev/scripts/wrapper.sh frontend:stop [project-name]` | Stop the background frontend process. Optional `project-name` overrides the runner container prefix (defaults to `COMPOSE_PROJECT_NAME` from `.env`) |
 | `./dev/scripts/wrapper.sh frontend:e2e` | Run `npx playwright test` in the Playwright runner |
 
 #### Infrastructure (OpenTofu)
@@ -174,7 +174,7 @@ Each wrapper command accepts an optional second argument — a subdirectory with
 | `./dev/scripts/wrapper.sh stack:logs:filestore` | MinIO logs |
 | `./dev/scripts/wrapper.sh stack:logs:metrics` | Prometheus logs |
 | `./dev/scripts/wrapper.sh stack:logs:mailer` | Mailpit logs |
-| `./dev/scripts/wrapper.sh stack:reset` | Force-remove all runner containers (clean up orphans from failed commands) |
+| `./dev/scripts/wrapper.sh stack:reset [project-name]` | Force-remove all runner containers (clean up orphans from failed commands). Optional `project-name` overrides the runner container prefix (defaults to `COMPOSE_PROJECT_NAME` from `.env`) |
 
 #### Database
 

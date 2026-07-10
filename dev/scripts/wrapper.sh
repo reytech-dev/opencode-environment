@@ -4,6 +4,32 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
+# Resolve the Docker Compose project name (used as the runner container name
+# prefix). Resolution order: explicit argument > exported COMPOSE_PROJECT_NAME >
+# value in .env. Hard-fails if none can be resolved. Sets the PROJECT_NAME global.
+resolve_project_name() {
+    local override="${1:-}"
+    if [ -n "$override" ]; then
+        PROJECT_NAME="$override"
+        return
+    fi
+    if [ -n "${COMPOSE_PROJECT_NAME:-}" ]; then
+        PROJECT_NAME="$COMPOSE_PROJECT_NAME"
+        return
+    fi
+    local val=""
+    if [ -f "$REPO_ROOT/.env" ]; then
+        val=$(grep -E '^COMPOSE_PROJECT_NAME=' "$REPO_ROOT/.env" 2>/dev/null | tail -n1 | sed 's|^[^=]*=||')
+        val="${val#\"}"
+        val="${val%\"}"
+    fi
+    if [ -z "$val" ]; then
+        echo "Error: COMPOSE_PROJECT_NAME could not be resolved. Pass it as an argument or set it in .env." >&2
+        exit 1
+    fi
+    PROJECT_NAME="$val"
+}
+
 run_cmd() {
     local runner="$1"
     local subdir="${2:-}"
@@ -62,7 +88,8 @@ case "${1:-}" in
     ;;
 
   backend:stop)
-    CONTAINERS=$(docker ps -q -f "name=workspace-java-runner" -f "status=running" 2>/dev/null)
+    resolve_project_name "${2:-}"
+    CONTAINERS=$(docker ps -q -f "name=${PROJECT_NAME}-java-runner" -f "status=running" 2>/dev/null)
     if [ -n "$CONTAINERS" ]; then
         echo "$CONTAINERS" | xargs -r docker stop
         echo "Backend stopped."
@@ -118,7 +145,8 @@ case "${1:-}" in
     ;;
 
   frontend:stop)
-    CONTAINERS=$(docker ps -q -f "name=workspace-node-runner" -f "status=running" 2>/dev/null)
+    resolve_project_name "${2:-}"
+    CONTAINERS=$(docker ps -q -f "name=${PROJECT_NAME}-node-runner" -f "status=running" 2>/dev/null)
     if [ -n "$CONTAINERS" ]; then
         echo "$CONTAINERS" | xargs -r docker stop
         echo "Frontend stopped."
@@ -183,8 +211,9 @@ case "${1:-}" in
     ;;
 
   stack:reset)
+    resolve_project_name "${2:-}"
     echo "Stopping and removing all project runner containers..."
-    docker ps -a --format '{{.ID}} {{.Image}} {{.Names}}' | grep ' workspace-.*-runner' | awk '{print $1}' | sort -u | xargs -r docker rm -f
+    docker ps -a --format '{{.ID}} {{.Image}} {{.Names}}' | grep " ${PROJECT_NAME}-.*-runner" | awk '{print $1}' | sort -u | xargs -r docker rm -f
     echo "Done."
     ;;
 
@@ -331,7 +360,7 @@ case "${1:-}" in
     ;;
 
   *)
-    echo "Usage: $0 {backend:test|backend:run|backend:start|backend:stop|frontend:install|frontend:test|frontend:build|frontend:start|frontend:stop|frontend:e2e|infrastructure:validate|infrastructure:apply|backend:version|infrastructure:version|infrastructure:plan|database:psql|stack:logs|stack:logs:database|stack:logs:filestore|stack:logs:metrics|stack:logs:mailer|stack:reset|speckit:visual|speckit:frontend-stage} [subdir|query]"
+    echo "Usage: $0 {backend:test|backend:run|backend:start|backend:stop|frontend:install|frontend:test|frontend:build|frontend:start|frontend:stop|frontend:e2e|infrastructure:validate|infrastructure:apply|backend:version|infrastructure:version|infrastructure:plan|database:psql|stack:logs|stack:logs:database|stack:logs:filestore|stack:logs:metrics|stack:logs:mailer|stack:reset|speckit:visual|speckit:frontend-stage} [subdir|query|project-name]"
     exit 1
     ;;
 esac
