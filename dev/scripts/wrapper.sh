@@ -217,6 +217,29 @@ case "${1:-}" in
     echo "Done."
     ;;
 
+  stack:purge)
+    resolve_project_name "${2:-}"
+    echo "WARNING: stack:purge will remove ALL project containers, volumes, and"
+    echo "locally-built images. This includes:"
+    echo "  - Database data (PostgreSQL)"
+    echo "  - Object storage (MinIO)"
+    echo "  - Email capture (Mailpit)"
+    echo "  - Package/build caches (pnpm, Gradle, Maven)"
+    echo "  - Project-scoped Docker volumes"
+    echo "  - Locally-built Docker images"
+    echo ""
+    read -p "Are you sure you want to continue? [y/N] " -r REPLY
+    echo ""
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        echo "Aborted."
+        exit 0
+    fi
+    echo "Stopping and removing all project resources..."
+    cd "$REPO_ROOT"
+    docker compose down -v --rmi local --remove-orphans
+    echo "Done."
+    ;;
+
   speckit:visual)
     project="${2:-}"
     if [ -z "$project" ]; then
@@ -360,7 +383,7 @@ case "${1:-}" in
     ;;
 
   *)
-    echo "Usage: $0 {backend:test|backend:run|backend:start|backend:stop|frontend:install|frontend:test|frontend:build|frontend:start|frontend:stop|frontend:e2e|infrastructure:validate|infrastructure:apply|backend:version|infrastructure:version|infrastructure:plan|database:psql|stack:logs|stack:logs:database|stack:logs:filestore|stack:logs:metrics|stack:logs:mailer|stack:reset|speckit:visual|speckit:frontend-stage} [subdir|query|project-name]"
+    echo "Usage: $0 {backend:test|backend:run|backend:start|backend:stop|frontend:install|frontend:test|frontend:build|frontend:start|frontend:stop|frontend:e2e|infrastructure:validate|infrastructure:apply|backend:version|infrastructure:version|infrastructure:plan|database:psql|stack:logs|stack:logs:database|stack:logs:filestore|stack:logs:metrics|stack:logs:mailer|stack:reset|stack:purge|speckit:visual|speckit:frontend-stage} [subdir|query|project-name]"
     exit 1
     ;;
 esac
