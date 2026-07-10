@@ -1,3 +1,9 @@
+## [1.23.1](https://github.com/reytech-dev/opencode-environment/compare/v1.23.0...v1.23.1) (2026-07-10)
+
+### Bug Fixes
+
+* **init:** add init params to docker starts ([9296afa](https://github.com/reytech-dev/opencode-environment/commit/9296afa2508705ffda2d7f6efc6636cd19073f90))
+
 ## [1.23.0](https://github.com/reytech-dev/opencode-environment/compare/v1.22.2...v1.23.0) (2026-07-10)
 
 ### Features
