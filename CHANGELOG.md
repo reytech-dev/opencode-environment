@@ -1,3 +1,9 @@
+## [1.23.0](https://github.com/reytech-dev/opencode-environment/compare/v1.22.2...v1.23.0) (2026-07-10)
+
+### Features
+
+* **cleanup:** add command to clear complete local state ([62cbb86](https://github.com/reytech-dev/opencode-environment/commit/62cbb8674e4116f39d5cb21af746b195b965cbb8))
+
 ## [1.22.2](https://github.com/reytech-dev/opencode-environment/compare/v1.22.1...v1.22.2) (2026-07-10)
 
 ### Bug Fixes
