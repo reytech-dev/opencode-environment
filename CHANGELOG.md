@@ -1,3 +1,9 @@
+## [1.22.1](https://github.com/reytech-dev/opencode-environment/compare/v1.22.0...v1.22.1) (2026-07-10)
+
+### Bug Fixes
+
+* **stack:reset:** add project appendix to docker stack:reset command ([b8fa06e](https://github.com/reytech-dev/opencode-environment/commit/b8fa06e5fa6adfdcf420f48a8e0daa2df45d767f))
+
 ## [1.22.0](https://github.com/reytech-dev/opencode-environment/compare/v1.21.2...v1.22.0) (2026-07-08)
 
 ### Features
