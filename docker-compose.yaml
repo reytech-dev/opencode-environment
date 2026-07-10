@@ -1,5 +1,6 @@
 services:
   opencode:
+    init: true
     build:
       context: .
       dockerfile: dev/runners/opencode/Dockerfile

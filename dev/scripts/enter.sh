@@ -94,11 +94,11 @@ print_welcome() {
 
 enter_shell() {
     print_welcome
-    exec "${COMPOSE_CMD[@]}" run --rm opencode bash
+    exec "${COMPOSE_CMD[@]}" run --rm --init opencode bash
 }
 
 run_command() {
-    exec "${COMPOSE_CMD[@]}" run --rm opencode "$@"
+    exec "${COMPOSE_CMD[@]}" run --rm --init opencode "$@"
 }
 
 # --------------------------------------------------------------------
