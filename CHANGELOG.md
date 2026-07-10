@@ -1,3 +1,9 @@
+## [1.22.2](https://github.com/reytech-dev/opencode-environment/compare/v1.22.1...v1.22.2) (2026-07-10)
+
+### Bug Fixes
+
+* **crawler:** add pm detection to hide it ([99502c2](https://github.com/reytech-dev/opencode-environment/commit/99502c2620618ca776084b2e8ef29aaf8da9b145))
+
 ## [1.22.1](https://github.com/reytech-dev/opencode-environment/compare/v1.22.0...v1.22.1) (2026-07-10)
 
 ### Bug Fixes
