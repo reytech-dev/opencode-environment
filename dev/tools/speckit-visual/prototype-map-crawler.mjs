@@ -24,6 +24,17 @@ const DETERMINISTIC_CSS = `
 }
 `;
 
+const HIDE_PROTOTYPE_MAP_UI_CSS = `
+[class*="pm-fab"],
+[class*="proto-fab"],
+[class*="proto-map-fab"],
+[class*="pm-ui"],
+[class*="proto-ui"],
+[class*="proto-map-ui"] {
+  display: none !important;
+}
+`;
+
 const COMPUTED_STYLE_PROPS = [
   "display", "position", "boxSizing", "width", "height",
   "margin", "padding", "color", "backgroundColor",
@@ -68,7 +79,10 @@ Optional options:
                               Default: 1
   --deep-max-screens <number> Max deep-discovered screens total.  Default: 50
   --dedup                     Remove duplicate screenshots (identical file bytes).
-                              PM screens win over deep duplicates.  Default: false
+                               PM screens win over deep duplicates.  Default: false
+  --no-hide-prototype-map-ui  Keep Prototype Map UI elements (FAB, navigation)
+                               visible in captured screenshots.
+                               Default: they are hidden automatically.
   --help                      Print this usage.
 
 Compare options:
@@ -123,6 +137,7 @@ function parseArgs(argv) {
     else if (a === "--no-fail-on-diff") args.flags.noFailOnDiff = true;
     else if (a === "--update-actual") args.flags.updateActual = true;
     else if (a === "--skip-frontend-healthcheck") args.flags.skipFrontendHealthcheck = true;
+    else if (a === "--no-hide-prototype-map-ui") args.flags.noHidePrototypeMapUi = true;
     else if (a === "--frontend-url") args.frontendUrl = argv[++i];
     else if (a === "--route-map") args.routeMap = argv[++i];
     else if (a === "--test-results-dir") args.testResultsDir = argv[++i];
@@ -201,8 +216,9 @@ function resolveConfig(parsed) {
   const compareTimeoutMs = parsed.compareTimeoutMs ?? timeoutMs;
   const settleMs = parsed.settleMs ?? 500;
   const skipFrontendHealthcheck = parsed.flags.skipFrontendHealthcheck ?? false;
+  const hidePrototypeMapUi = parsed.flags.noHidePrototypeMapUi ? false : true;
 
-  return { command, project, canonicalUrl, outputRoot, prototypeMapText, viewports, viewportFilter, maxEntries, fullPage, headless, timeoutMs, deep, deepMaxDepth, deepMaxScreens, dedup, frontendUrl, routeMapPath, testResultsDir, failOnDiff, updateActual, compareTimeoutMs, settleMs, skipFrontendHealthcheck };
+  return { command, project, canonicalUrl, outputRoot, prototypeMapText, viewports, viewportFilter, maxEntries, fullPage, headless, timeoutMs, deep, deepMaxDepth, deepMaxScreens, dedup, frontendUrl, routeMapPath, testResultsDir, failOnDiff, updateActual, compareTimeoutMs, settleMs, skipFrontendHealthcheck, hidePrototypeMapUi };
 }
 
 function ensureDir(p) {
@@ -779,6 +795,10 @@ async function captureViewport(page, viewport, screen, config) {
 
   const fileName = `${screen.id}__${viewport.name}.png`;
   const filePath = join(screenshotDir, fileName);
+
+  if (config.hidePrototypeMapUi) {
+    await page.addStyleTag({ content: HIDE_PROTOTYPE_MAP_UI_CSS });
+  }
 
   await page.screenshot({
     path: filePath,
