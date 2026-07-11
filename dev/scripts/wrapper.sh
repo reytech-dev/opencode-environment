@@ -101,42 +101,44 @@ case "${1:-}" in
     ;;
 
   frontend:version)
-    docker compose run --rm node-runner pnpm --version
+    docker compose run --rm --user "$(id -u):$(id -g)" node-runner pnpm --version
     ;;
 
   frontend:install)
     subdir="${2:-}"
+    mkdir -p "$REPO_ROOT/workspace/.node-home"
+    chown "$(id -u):$(id -g)" "$REPO_ROOT/workspace/.node-home" 2>/dev/null || true
     if [ -n "$subdir" ]; then
-      docker compose run --rm -w "/workspace/frontend/$subdir" node-runner pnpm install
+      docker compose run --rm --user "$(id -u):$(id -g)" -e HOME=/workspace/.node-home -w "/workspace/frontend/$subdir" node-runner pnpm install
     else
-      docker compose run --rm -w "/workspace/frontend" node-runner pnpm install
+      docker compose run --rm --user "$(id -u):$(id -g)" -e HOME=/workspace/.node-home -w "/workspace/frontend" node-runner pnpm install
     fi
     ;;
 
   frontend:test)
     subdir="${2:-}"
     if [ -n "$subdir" ]; then
-      docker compose run --rm -w "/workspace/frontend/$subdir" node-runner pnpm test
+      docker compose run --rm --user "$(id -u):$(id -g)" -e HOME=/workspace/.node-home -w "/workspace/frontend/$subdir" node-runner pnpm test
     else
-      docker compose run --rm -w "/workspace/frontend" node-runner pnpm test
+      docker compose run --rm --user "$(id -u):$(id -g)" -e HOME=/workspace/.node-home -w "/workspace/frontend" node-runner pnpm test
     fi
     ;;
 
   frontend:build)
     subdir="${2:-}"
     if [ -n "$subdir" ]; then
-      docker compose run --rm -w "/workspace/frontend/$subdir" node-runner pnpm build
+      docker compose run --rm --user "$(id -u):$(id -g)" -e HOME=/workspace/.node-home -w "/workspace/frontend/$subdir" node-runner pnpm build
     else
-      docker compose run --rm -w "/workspace/frontend" node-runner pnpm build
+      docker compose run --rm --user "$(id -u):$(id -g)" -e HOME=/workspace/.node-home -w "/workspace/frontend" node-runner pnpm build
     fi
     ;;
 
   frontend:start)
     subdir="${2:-}"
     if [ -n "$subdir" ]; then
-        nohup docker compose run --rm --service-ports --use-aliases -w "/workspace/frontend/$subdir" node-runner pnpm dev > /tmp/frontend.log 2>&1 &
+        nohup docker compose run --rm --user "$(id -u):$(id -g)" -e HOME=/workspace/.node-home --service-ports --use-aliases -w "/workspace/frontend/$subdir" node-runner pnpm dev > /tmp/frontend.log 2>&1 &
     else
-        nohup docker compose run --rm --service-ports --use-aliases -w "/workspace/frontend" node-runner pnpm dev > /tmp/frontend.log 2>&1 &
+        nohup docker compose run --rm --user "$(id -u):$(id -g)" -e HOME=/workspace/.node-home --service-ports --use-aliases -w "/workspace/frontend" node-runner pnpm dev > /tmp/frontend.log 2>&1 &
     fi
     PID=$!
     disown $PID
@@ -159,10 +161,12 @@ case "${1:-}" in
 
   frontend:e2e)
     subdir="${2:-}"
+    mkdir -p "$REPO_ROOT/workspace/.pwuser-home"
+    chown "$(id -u):$(id -g)" "$REPO_ROOT/workspace/.pwuser-home" 2>/dev/null || true
     if [ -n "$subdir" ]; then
-        docker compose run --rm --use-aliases -w "/workspace/frontend/$subdir" playwright-runner npm run e2e
+        docker compose run --rm --use-aliases --user "$(id -u):$(id -g)" -e HOME=/workspace/.pwuser-home -w "/workspace/frontend/$subdir" playwright-runner npm run e2e
     else
-        docker compose run --rm --use-aliases -w "/workspace/frontend" playwright-runner npm run e2e
+        docker compose run --rm --use-aliases --user "$(id -u):$(id -g)" -e HOME=/workspace/.pwuser-home -w "/workspace/frontend" playwright-runner npm run e2e
     fi
     ;;
 
@@ -286,6 +290,9 @@ case "${1:-}" in
 
     shift 3
 
+    mkdir -p "$REPO_ROOT/workspace/.node-home"
+    chown "$(id -u):$(id -g)" "$REPO_ROOT/workspace/.node-home" 2>/dev/null || true
+
     design_root="/workspace/design-context/$project"
     stage_root="/workspace/frontend-staging/$project"
 
@@ -295,10 +302,13 @@ case "${1:-}" in
         if ! echo "$*" | grep -q -- '--blueprint-catalog'; then
           catalog_arg="--blueprint-catalog /opencode-catalog/.opencode/blueprints.yaml"
         fi
+        chown -R "$(id -u):$(id -g)" "$REPO_ROOT/dev/tools/speckit-frontend-stage/node_modules" 2>/dev/null || true
         docker compose run --rm --use-aliases \
+          --user "$(id -u):$(id -g)" \
+          -e HOME=/workspace/.node-home \
           -w /tools/speckit-frontend-stage \
           node-runner \
-          bash -lc "npm install && node materialize-frontend-stage.mjs \
+          bash -c "npm install && node materialize-frontend-stage.mjs \
             --project '$project' \
             --design-root '$design_root' \
             --stage-root '$stage_root' \
@@ -308,6 +318,8 @@ case "${1:-}" in
 
       install)
         docker compose run --rm --use-aliases \
+          --user "$(id -u):$(id -g)" \
+          -e HOME=/workspace/.node-home \
           -w "$stage_root" \
           node-runner \
           pnpm install
@@ -315,6 +327,8 @@ case "${1:-}" in
 
       start)
         docker compose run --rm --service-ports --use-aliases \
+          --user "$(id -u):$(id -g)" \
+          -e HOME=/workspace/.node-home \
           -w "$stage_root" \
           node-runner \
           pnpm dev --host 0.0.0.0
@@ -322,6 +336,8 @@ case "${1:-}" in
 
       build)
         docker compose run --rm --use-aliases \
+          --user "$(id -u):$(id -g)" \
+          -e HOME=/workspace/.node-home \
           -w "$stage_root" \
           node-runner \
           pnpm build
@@ -329,6 +345,8 @@ case "${1:-}" in
 
       test)
         docker compose run --rm --use-aliases \
+          --user "$(id -u):$(id -g)" \
+          -e HOME=/workspace/.node-home \
           -w "$stage_root" \
           node-runner \
           pnpm test
@@ -369,10 +387,13 @@ case "${1:-}" in
           echo "Usage: $0 speckit:frontend-stage <project-slug> promote <frontend-repo>" >&2
           exit 1
         fi
+        chown -R "$(id -u):$(id -g)" "$REPO_ROOT/dev/tools/speckit-frontend-stage/node_modules" 2>/dev/null || true
         docker compose run --rm --use-aliases \
+          --user "$(id -u):$(id -g)" \
+          -e HOME=/workspace/.node-home \
           -w /tools/speckit-frontend-stage \
           node-runner \
-          bash -lc "npm install && node materialize-frontend-stage.mjs \
+          bash -c "npm install && node materialize-frontend-stage.mjs \
             --project '$project' \
             --design-root '$design_root' \
             --stage-root '$stage_root' \
