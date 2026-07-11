@@ -1,3 +1,10 @@
+## [1.23.2](https://github.com/reytech-dev/opencode-environment/compare/v1.23.1...v1.23.2) (2026-07-11)
+
+### Bug Fixes
+
+* **frontend:** add fix for any frontend artifacts host permission mismatch ([8519191](https://github.com/reytech-dev/opencode-environment/commit/8519191f8904c769d226dcfc95601c51698a8395))
+* **playwright:** add fix for playwright artifacts host permission mismatch ([8353e48](https://github.com/reytech-dev/opencode-environment/commit/8353e48c62923d90fffae1bfef72b5c812d59f8a))
+
 ## [1.23.1](https://github.com/reytech-dev/opencode-environment/compare/v1.23.0...v1.23.1) (2026-07-10)
 
 ### Bug Fixes
