@@ -252,20 +252,24 @@ case "${1:-}" in
     output_root="/workspace/design-context/$project"
     host_design_dir="$REPO_ROOT/workspace/design-context/$project"
 
+    mkdir -p "$REPO_ROOT/workspace/.pwuser-home"
+    chown "$(id -u):$(id -g)" "$REPO_ROOT/workspace/.pwuser-home" 2>/dev/null || true
+
     mkdir -p "$host_design_dir/visual-regression/fixtures" \
              "$host_design_dir/visual-regression/screenshots" \
              "$host_design_dir/visual-regression/test-results" \
              "$host_design_dir/design-processing"
-    chmod -R 777 "$host_design_dir/visual-regression" "$host_design_dir/design-processing" 2>/dev/null || true
 
     docker compose up -d design-preview
 
     docker compose run --rm --use-aliases \
+      --user "$(id -u):$(id -g)" \
+      -e HOME=/workspace/.pwuser-home \
       -e SPECKIT_PROJECT="$project" \
       -e DESIGN_PREVIEW_URL="$canonical_url" \
       -e SPECKIT_VISUAL_OUTPUT_ROOT="$output_root" \
       playwright-runner \
-      bash -lc "cp -r /tools/speckit-visual /tmp/crawler && cd /tmp/crawler && npm install && node prototype-map-crawler.mjs $* \
+      bash -c "cp -r /tools/speckit-visual /tmp/crawler && cd /tmp/crawler && npm install && node prototype-map-crawler.mjs $* \
         --project '$project' \
         --canonical-url '$canonical_url' \
         --output-root '$output_root'"
